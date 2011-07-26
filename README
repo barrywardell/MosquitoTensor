@@ -1,0 +1,19 @@
+The MosquitoTensor package provides a Tensor class: a class which
+encapsulates the data and methods necessary to perform arbitrary rank
+tensor algebra in 4 dimensions. The dimension may be extended if there
+is interest, and a differential algebra class could also be provided.
+
+The code is provided as a drop-in file, instead of a library. So to use
+it in your code you would need to include the "Tensor.h" header file in
+the code using it and would need to compile the object code into the
+executable. One can also make a library using the ar command and then
+link to this.
+
+For better documentation, run doxygen by typing: 'make docs' and open
+docs/html/index.html for a better description. One could also read
+srcs/mainpage.dox but there is much markup language there. Due to the
+presence of a formula, you will need latex to properly generate
+the documentation.
+
+The code is provided with GPLv3, details of the license are in COPYING.
+Copyright Aaryn Tonita, 2011

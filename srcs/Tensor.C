@@ -1,0 +1,240 @@
+// Copyright Aaryn Tonita, 2011
+// Distributed under the Gnu general public license
+#include <cassert>
+#include "Tensor.h"
+#define DIMENSION 4
+
+int Tensor::ipow(int i, int j) const {
+  int retValue = 1;
+  for (int k = 0; k < j; k++) {
+    retValue *= i;
+  }
+  return retValue;
+}
+
+
+Tensor::Tensor(int Rank, IndexType* Types) {
+  init(Rank,Types);
+}
+
+void Tensor::init(int Rank, IndexType* Types) {
+  rank = Rank;
+  if (rank > 0) {
+    types = new IndexType[rank];
+    components = new double[ipow(DIMENSION,rank)];
+    indexes = new char[rank];
+  } else {
+    types = new IndexType[1]; // To avoid double free...
+    components = new double[1];
+    indexes = new char[rank];
+  }
+  for (int i = 0; i < rank; i++) {
+    types[i] = Types[i];
+    indexes[i] = 0;
+  }
+  for (int i = 0; i < ipow(DIMENSION,rank); i++) components[i] = 0.0;
+}
+
+Tensor::Tensor(int Rank, IndexType* Types, char* Indexes) {
+  init(Rank,Types);
+  for (int i = 0; i < rank; i++) {
+    indexes[i] = Indexes[i];
+  }
+}
+
+Tensor::Tensor(const Tensor &original) {
+  rank = original.rank;
+  if (rank > 0) {
+    types = new IndexType[rank];
+    components = new double[ipow(DIMENSION,rank)];
+    indexes = new char[rank];
+  } else {
+    types = new IndexType[1]; // To avoid double free...
+    components = new double[1];
+    indexes = new char[1];
+  }
+  for (int i = 0; i < rank; i++) {
+    types[i] = original.types[i];
+    indexes[i] = original.indexes[i];
+  }
+  for (int i = 0; i < ipow(DIMENSION,rank); i++) {
+    components[i] = original.components[i];
+  }
+}
+
+int Tensor::getRank() const {
+  return rank;
+}
+
+const Tensor::IndexType* Tensor::getTypes() const {
+  return types;
+}
+
+double Tensor::getComponent(int* indices) const {
+  int index1 = index(indices);
+  return components[index1];
+}
+
+void Tensor::setComponent(int* indices, double value) {
+  components[index(indices)] = value;
+}
+
+int Tensor::index(int* indices) const {
+  int index = 0;
+  int factor = 1;
+  for (int j = rank-1; j >= 0; j--) {
+    index += factor*indices[j];
+    factor *= DIMENSION;
+  }
+  return index;
+}
+
+Tensor::~Tensor() {
+  delete[] types;
+  delete[] components;
+}
+
+void Tensor::indexToIndices(int index, int* indices) const {
+  for (int i = rank-1; i >= 0; i--) {
+    indices[i] = index%DIMENSION;
+    index /= DIMENSION;
+  }
+}
+
+Tensor Tensor::contract(int index1, int index2) const {
+  // Build the result type.
+  assert(types[index1] != types[index2]);
+  // Won't use the last two, but need to allocate more than 0...
+  Tensor::IndexType resultTypes[rank];
+  char resultIndexes[rank];
+  int runningIndex = 0;
+  for (int i = 0; i < rank; i++) {
+    if (i != index1 && i != index2) {
+      resultTypes[runningIndex] = types[i];
+      resultIndexes[runningIndex++] = indexes[i];
+    }
+  }
+  Tensor result(rank-2, resultTypes);
+  for (int i = 0; i < rank-2; i++) {
+    result.indexes[i] = resultIndexes[i];
+  }
+
+  int indices[rank];
+  int resultIndices[result.getRank()];
+  for (int i = 0; i < ipow(DIMENSION, result.getRank()); i++) {
+    result.indexToIndices(i,resultIndices);
+    runningIndex = 0;
+    // The free indices...
+    for (int j = 0; j < rank; j++) {
+      if (j != index1 && j!= index2) {
+        indices[j] = resultIndices[runningIndex];
+        runningIndex++;
+      }
+    }
+
+    // Sum over the contracting indices.
+    double value = 0.0;
+    for (int j = 0; j < DIMENSION; j++) {
+      indices[index1] = j;
+      indices[index2] = j;
+      value += getComponent(indices);
+    }
+    result.setComponent(resultIndices, value);
+  }
+  return result;
+}
+
+Tensor & Tensor::operator*=(const double scalar) {
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
+    components[i] *= scalar;
+  }
+  return *this;
+}
+
+Tensor & Tensor::operator+=(const Tensor &tensor) {
+  const Tensor::IndexType* tensorTypes = tensor.getTypes();
+  for (int i = 0; i < rank; i++) {
+    assert(tensorTypes[i] == types[i]);
+  }
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
+    components[i] += tensor.components[i];
+  }
+  return *this;
+}
+
+Tensor Tensor::operator*(const double scalar) const {
+  Tensor result = *this;
+  result *= scalar;
+  return result;
+}
+
+Tensor Tensor::operator+(const Tensor &tensor) const {
+  Tensor result = *this;
+  result += tensor;
+  return result;
+}
+
+Tensor Tensor::operator()(char i1, ...) {
+  if (i1 == 0 || rank == 1) {
+    for (int i = 0; i < rank; i++) indexes[i] = i1;
+  } else if (rank > 0) {
+    va_list listPointer;
+    va_start(listPointer, i1);
+    indexes[0] = i1;
+    for (int i = 1; i < rank; i++) {
+      // Mysterious? If the following were char, icpc produces
+      // warning #1340: "char" would have been promoted to "int" when
+      // passed through the ellipsis parameter; use the latter type
+      // instead
+      indexes[i] = va_arg(listPointer, int);
+    }
+    va_end(listPointer);
+    return (*this).contract();
+  }
+  return (*this);
+}
+
+Tensor Tensor::contract() const {
+  for (int i = 0; i < rank; i++) {
+    char index = indexes[i];
+    if (index != 0 && index != '.' && index != '-') {
+      for (int j = i+1; j < rank; j++) {
+        if (index == indexes[j]) {
+          return contract(i,j).contract();
+        }
+      }
+    }
+    // No contraction found.
+    for (int i = 0; i < rank; i++) indexes[i] = 0;
+  }
+  Tensor copy = *this;
+  return copy;
+}
+
+Tensor Tensor::operator*(const Tensor& tensor) const {
+  // tensoruild the result type...
+  IndexType resultTypes[rank + tensor.getRank()];
+  char resultIndexes[rank + tensor.getRank()];
+  const Tensor::IndexType* bTypes = tensor.getTypes();
+  for (int i = 0; i < rank; i++) {
+    resultTypes[i] = types[i];
+    resultIndexes[i] = indexes[i];
+  }
+  for (int i = 0; i < tensor.getRank(); i++) {
+    resultTypes[rank+i] = bTypes[i];
+    resultIndexes[rank+i] = tensor.indexes[i];
+  }
+  Tensor result(rank+tensor.getRank(), resultTypes, resultIndexes);
+
+  int resultIndices[result.getRank()];
+  int indices[rank];
+  int tensorIndices[tensor.getRank()];
+  for (int i = 0; i < ipow(DIMENSION, result.getRank()); i++) {
+    result.indexToIndices(i, resultIndices);
+    for (int j = 0; j < rank; j++) indices[j] = resultIndices[j];
+    for (int j = 0; j < tensor.getRank(); j++) tensorIndices[j] = resultIndices[rank+j];
+    double value = getComponent(indices)*tensor.getComponent(tensorIndices);
+    result.setComponent(resultIndices, value);
+  }
+  return result.contract();
+}

@@ -1,0 +1,66 @@
+Copyright Aaryn Tonita, 2011
+Distributed under the Gnu general public license
+/**
+ * \mainpage
+ * The Tensor class is a C++ class for doing tensor manipulations. The
+ * rank of the tensor is arbitrary, although there are practical
+ * limitations in memory. For all intents and purpose rank 16 is
+ * probably the maximum that can be handled. The dimension is currently
+ * macroed to be 4, although in principle this is an easy change to
+ * make.
+ *
+ * @section MAINPAGE Usage overview
+ * The usual arithmetic operations have been overloaded. So one may
+ * perform the following computation:
+ * \f[
+ *  a^a = \pi\Gamma^a_{bc}u^bu^c
+ * \f]
+ * using the following code
+ * @code 
+ *  Tensor a = M_PI*Gamma('a','b','c')*u('a')*u('c'); 
+ * @endcode
+ * so long as the Tensors Gamma and u have been defined somewhere, and
+ * have the correct IndexType. Dummy indexes are not persistent.
+ *
+ * Tensor objects have covariant (down) and contravariant (up) indices,
+ * and operations such as addition and contraction have requirements on
+ * the index types (character) of the tensors.
+ *
+ * @section MAINPAGE Creating a new tensor
+ * Tensors must be created with a rank and tensor index types. The
+ * following code produces the Christoffel symbols of the second type:
+ * @code
+ *  Tensor::IndexType christoffelTypes[3];
+ *  christoffelTypes[0] = Tensor::UP;
+ *  christoffelTypes[1] = Tensor::DOWN;
+ *  christoffelTypes[2] = Tensor::DOWN;
+ *  Tensor Gamma(3, christoffelTypes);
+ * @endcode
+ * while the individual components would be set with calls to
+ * Tensor::setComponent().
+ *
+ * @section MAINPAGE Working with components
+ * Indexing functions are provided to make looping easy.
+ * @code
+ *  int indices[3];
+ *  for (int i = 0; i < pow(DIMENSION, 3); i++) {
+ *    gamma.indexToIndices(i, indices);
+ *    double value = computeGamma(indices, t, x, y, z);
+ *    gamma.setComponent(indices, value);
+ *  }
+ * @endcode
+ * where computeGamma() would be need to be a user defined function that
+ * computes the Christoffel symbols at an arbitrary point and takes an
+ * integer array to specify the Christoffel symbol. <B> The last index
+ * is the fastest running, this is the C style indexing. </B> If the
+ * user uses the same memory model, everything is much easier:
+ * @code
+ *  double* myGammaComponents = computeGamma(t,x,y,z);
+ *  double* gammaComponents = gamma.getComponents();
+ *  for (int i = 0; i < pow(DIMENSION, 3); i++) {
+ *    gammaComponents[i] = myGammaComponents[i];
+ *  }
+ *  delete[] gammaComponents;
+ * @endcode
+ * although this is a matter of taste.
+ */
