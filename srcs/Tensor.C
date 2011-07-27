@@ -13,11 +13,11 @@ int Tensor::ipow(int i, int j) const {
 }
 
 
-Tensor::Tensor(int Rank, IndexType* Types) {
+Tensor::Tensor(int Rank, const IndexType* Types) {
   init(Rank,Types);
 }
 
-void Tensor::init(int Rank, IndexType* Types) {
+void Tensor::init(int Rank, const IndexType* Types) {
   rank = Rank;
   if (rank > 0) {
     types = new IndexType[rank];
@@ -35,7 +35,7 @@ void Tensor::init(int Rank, IndexType* Types) {
   for (int i = 0; i < ipow(DIMENSION,rank); i++) components[i] = 0.0;
 }
 
-Tensor::Tensor(int Rank, IndexType* Types, char* Indexes) {
+Tensor::Tensor(int Rank, const IndexType* Types, const char* Indexes) {
   init(Rank,Types);
   for (int i = 0; i < rank; i++) {
     indexes[i] = Indexes[i];
@@ -68,6 +68,26 @@ int Tensor::getRank() const {
 
 const Tensor::IndexType* Tensor::getTypes() const {
   return types;
+}
+
+double & Tensor::get(int i1, ...) const {
+  if (rank == 0) {
+    return components[0];
+  } else {
+    int indices[rank];
+    indices[0] = i1;
+    va_list listPointer;
+    va_start(listPointer, i1);
+    for (int i = 1; i < rank; i++) {
+      indices[i] = va_arg(listPointer, int);
+    }
+    va_end(listPointer);
+    return components[index(indices)];
+  }
+}
+
+double * Tensor::getComponents() const {
+  return components;
 }
 
 double Tensor::getComponent(int* indices) const {

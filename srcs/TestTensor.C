@@ -56,6 +56,15 @@ void TestTensor::runContractionTest() {
   Tensor scalar4 = u('a')*v('a');
   assert(scalar4.getRank() == 0);
   assert(scalar4.getComponent(0) == 4.);
+
+  Tensor test0(2, uv.getTypes());
+  test0.get(0,0) = -1;
+  test0.get(1,1) = -6;
+  test0.get(2,2) = 3;
+  test0.get(3,3) = 4;
+  test0.get(3,4) = -100000;
+  Tensor scalar5 = test0('a','a');
+  assert(scalar5.get(0) == 0.);
 }
 
 void TestTensor::runTensorMultiplyTest() {

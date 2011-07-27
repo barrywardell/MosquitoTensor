@@ -36,7 +36,7 @@ class Tensor {
      * \param Rank The rank of the tensor.
      * \param Types The types of the indices.
      */
-    Tensor(int Rank, IndexType* Types);
+    Tensor(int Rank, const IndexType* Types);
 
     /**
      * Copy constructor.
@@ -62,6 +62,14 @@ class Tensor {
      * \retval component The selected component.
      */
     double getComponent(int* indices) const;
+
+    /**
+     * \brief Returns a reference to the indexed component.
+     * \param i1 The first index.
+     * \param ... The next indices.
+     * \retval component The indexed component.
+     */
+    double & get(int i1, ...) const;
 
     /**
      * \brief Returns a pointer to the components.
@@ -240,7 +248,7 @@ class Tensor {
      * \param Types The types of the indices.
      * \param Indexes The indexes used for the tensor.
      */
-    Tensor(int Rank, IndexType* Types, char* Indexes);
+    Tensor(int Rank, const IndexType* Types, const char* Indexes);
 
   private:
     /**
@@ -270,7 +278,7 @@ class Tensor {
      * \param Rank The rank of the tensor.
      * \param Types The types of the indices.
      */
-    void init(int Rank, IndexType* Types);
+    void init(int Rank, const IndexType* Types);
 };
 
 #endif
