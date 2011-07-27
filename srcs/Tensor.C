@@ -204,8 +204,6 @@ Tensor Tensor::contract() const {
         }
       }
     }
-    // No contraction found.
-    for (int i = 0; i < rank; i++) indexes[i] = 0;
   }
   Tensor copy = *this;
   return copy;

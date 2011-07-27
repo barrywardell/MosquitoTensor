@@ -20,7 +20,9 @@ Distributed under the Gnu general public license
  *  Tensor a = M_PI*Gamma('a','b','c')*u('a')*u('c'); 
  * @endcode
  * so long as the Tensors Gamma and u have been defined somewhere, and
- * have the correct IndexType. Dummy indexes are not persistent.
+ * have the correct IndexType. Dummy indexes are persistent, so be
+ * careful when multiplying tensors so that you do not unwittingly
+ * contract.
  *
  * Tensor objects have covariant (down) and contravariant (up) indices,
  * and operations such as addition and contraction have requirements on
@@ -37,7 +39,8 @@ Distributed under the Gnu general public license
  *  Tensor Gamma(3, christoffelTypes);
  * @endcode
  * while the individual components would be set with calls to
- * Tensor::setComponent().
+ * Tensor::setComponent(). All of the tensor components are initially
+ * set to zero.
  *
  * @section MAINPAGE Working with components
  * Indexing functions are provided to make looping easy.
