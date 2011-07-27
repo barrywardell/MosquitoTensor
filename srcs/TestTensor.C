@@ -57,7 +57,9 @@ void TestTensor::runContractionTest() {
   assert(scalar4.getRank() == 0);
   assert(scalar4.get(0) == 4.);
 
-  Tensor test0(2, uv.getTypes());
+  IndexType up = Tensor::UP;
+  IndexType down = Tensor::DOWN;
+  Tensor test0(2, up, down);
   test0.get(0,0) = -1;
   test0.get(1,1) = -6;
   test0.get(2,2) = 3;

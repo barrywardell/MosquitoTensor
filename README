@@ -9,18 +9,15 @@ the code using it and would need to compile the object code into the
 executable. One can also make a library using the ar command and then
 link to this.
 
+=======================================================================
+
 A brief outline:
 
-Tensor::IndexType indexTypes[2];
-indexTypes[0] = Tensor::DOWN;
-indexTypes[1] = Tensor::DOWN;
-Tensor eta(2, indexTypes);
-int indexes[2];
-indexes[0] = 0; indexes[1] = 0;
-eta.setComponent(indexes, -1);
+Tensor::IndexType down = Tensor::DOWN;
+Tensor eta(2, down, down);
+eta.get(0,0) = -1;
 for (int i = 1; i < 4; i++) {
-  indexes[0] = i; indexes[1] = i;
-  eta.setComponent(indexes, 1);
+  eta.get(i,i) = 1;
 }
 
 makes the Special Relativity metric tensor eta. Unspecified components

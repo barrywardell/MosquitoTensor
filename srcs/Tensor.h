@@ -34,6 +34,17 @@ class Tensor {
      * the components and sets the contravariant/covariant type of the
      * indices.
      * \param Rank The rank of the tensor.
+     * \param ... The types of the indices.
+     */
+    Tensor(int Rank, ...);
+
+    /**
+     * \brief Default constructor.
+     *
+     * Creates the point tensor. Sets the rank, creates storage, zeros
+     * the components and sets the contravariant/covariant type of the
+     * indices.
+     * \param Rank The rank of the tensor.
      * \param Types The types of the indices.
      */
     Tensor(int Rank, const IndexType* Types);
@@ -53,6 +64,16 @@ class Tensor {
     double & get(int i1, ...) const;
 
     /**
+     * \brief Returns a reference to the indexed component.
+     *
+     * It is sometimes preferable to work with an array of indices than
+     * to work with them directly.
+     * \param indices The array of the indices specifying the component.
+     * \retval component The indexed component.
+     */
+    double & get(int* indices) const;
+
+    /**
      * \brief Returns a pointer to the components.
      *
      * Since one can individually change the components via the index,
@@ -68,8 +89,20 @@ class Tensor {
      * To abstract away the storage model. Converts n=rank indices into a
      * single 1-d index. This is used to get the actual component from
      * the 1d storage array.
+     * \param indices An array of indices.
      */
     int index(int* indices) const;
+
+    /**
+     * \brief An indexing function. 
+     *
+     * To abstract away the storage model. Converts n=rank indices into a
+     * single 1-d index. This is used to get the actual component from
+     * the 1d storage array.
+     * \param i1 The first index.
+     * \param ... The next rank-1 indices.
+     */
+    int index(int i1, ...) const;
 
     /**
      * \brief Converts 1d index to rank-d.

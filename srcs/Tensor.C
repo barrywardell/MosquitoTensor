@@ -1,5 +1,6 @@
 // Copyright Aaryn Tonita, 2011
 // Distributed under the Gnu general public license
+#include <cstdlib>
 #include <cassert>
 #include "Tensor.h"
 #define DIMENSION 4
@@ -12,6 +13,20 @@ int Tensor::ipow(int i, int j) const {
   return retValue;
 }
 
+Tensor::Tensor(int Rank, ...) {
+  if (Rank == 0) {
+    init(Rank,NULL);
+  } else {
+    IndexType Types[Rank];
+    va_list listPointer;
+    va_start(listPointer, Rank);
+    for (int i = 0; i < Rank; i++) {
+      Types[i] = (IndexType)va_arg(listPointer, int);
+    }
+    va_end(listPointer);
+    init(Rank, Types);
+  }
+}
 
 Tensor::Tensor(int Rank, const IndexType* Types) {
   init(Rank,Types);
@@ -70,6 +85,10 @@ const Tensor::IndexType* Tensor::getTypes() const {
   return types;
 }
 
+double & Tensor::get(int* indices) const {
+  return components[index(indices)];
+}
+
 double & Tensor::get(int i1, ...) const {
   if (rank == 0) {
     return components[0];
@@ -88,6 +107,22 @@ double & Tensor::get(int i1, ...) const {
 
 double * Tensor::getComponents() const {
   return components;
+}
+
+int Tensor::index(int i1, ...) const {
+  if (rank == 0) {
+    return 0;
+  } else {
+    int indices[rank];
+    indices[0] = i1;
+    va_list listPointer;
+    va_start(listPointer, i1);
+    for (int i = 1; i < rank; i++) {
+      indices[i] = va_arg(listPointer, int);
+    }
+    va_end(listPointer);
+    return index(indices);
+  }
 }
 
 int Tensor::index(int* indices) const {

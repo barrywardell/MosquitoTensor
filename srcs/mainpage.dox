@@ -32,11 +32,9 @@ Distributed under the Gnu general public license
  * Tensors must be created with a rank and tensor index types. The
  * following code produces the Christoffel symbols of the second type:
  * @code
- *  Tensor::IndexType christoffelTypes[3];
- *  christoffelTypes[0] = Tensor::UP;
- *  christoffelTypes[1] = Tensor::DOWN;
- *  christoffelTypes[2] = Tensor::DOWN;
- *  Tensor Gamma(3, christoffelTypes);
+ *  Tensor::IndexType up = Tensor::UP;
+ *  Tensor::IndexType down = Tensor::DOWN;
+ *  Tensor Gamma(3, up, down, down);
  * @endcode
  * while the individual components would be set with calls to
  * Tensor::setComponent(). All of the tensor components are initially
@@ -49,7 +47,7 @@ Distributed under the Gnu general public license
  *  for (int i = 0; i < pow(DIMENSION, 3); i++) {
  *    gamma.indexToIndices(i, indices);
  *    double value = computeGamma(indices, t, x, y, z);
- *    gamma.setComponent(indices, value);
+ *    gamma.get(indices) =  value;
  *  }
  * @endcode
  * where computeGamma() would be need to be a user defined function that
@@ -65,5 +63,11 @@ Distributed under the Gnu general public license
  *  }
  *  delete[] gammaComponents;
  * @endcode
- * although this is a matter of taste.
+ * although this is a matter of taste. The individual components can
+ * also be set manually:
+ * @code
+ *  gamma.get(1,0,0) = m*(r - 2*m)/pow(r, 3);
+ * @endcode
+ * which would be the {r,tt} Christoffel symbol for the Schwarzschild
+ * spacetime.
  */
