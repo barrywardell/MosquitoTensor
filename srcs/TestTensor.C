@@ -29,12 +29,12 @@ void TestTensor::runContractionTest() {
   Tensor::IndexType vector = Tensor::UP;
   Tensor u(1, &vector);
   for (int i = 0; i < DIMENSION; i++) {
-    u.setComponent(&i, i+1);
+    u.get(i) = i+1;
   }
   vector = Tensor::DOWN;
   Tensor v(1, &vector);
   for (int i = 0; i < DIMENSION; i++) {
-    v.setComponent(&i, ipow(-1,i)/(double)(i+1));
+    v.get(i) =  ipow(-1,i)/(double)(i+1);
   }
 
   Tensor::IndexType indexTypes[2];
@@ -43,19 +43,19 @@ void TestTensor::runContractionTest() {
   Tensor uv = u*v;
 
   Tensor scalar1 = uv.contract(0, 1);
-  assert(scalar1.getComponent(0) == 0.);
+  assert(scalar1.get(0) == 0.);
 
   for (int i = 0; i < DIMENSION; i++) {
-    u.setComponent(&i, 1);
-    v.setComponent(&i, 1);
+    u.get(i) = 1;
+    v.get(i) = 1;
   }
   Tensor uv2 = u*v;
   Tensor scalar3 = uv2.contract(0,1);
-  assert(scalar3.getComponent(0) == 4.);
+  assert(scalar3.get(0) == 4.);
 
   Tensor scalar4 = u('a')*v('a');
   assert(scalar4.getRank() == 0);
-  assert(scalar4.getComponent(0) == 4.);
+  assert(scalar4.get(0) == 4.);
 
   Tensor test0(2, uv.getTypes());
   test0.get(0,0) = -1;
@@ -71,18 +71,15 @@ void TestTensor::runTensorMultiplyTest() {
   Tensor::IndexType vector = Tensor::UP;
   Tensor u(1, &vector);
   for (int i = 0; i < DIMENSION; i++) {
-    u.setComponent(&i, i+1);
+    u.get(i) =  i+1;
   }
   Tensor::IndexType indexTypes[2];
   indexTypes[0] = Tensor::UP;
   indexTypes[1] = Tensor::UP;
   Tensor uSquared = u*u;
-  int indices[2];
   for (int i = 0; i < DIMENSION; i++) {
     for (int j = 0; j < DIMENSION; j++) {
-      indices[0] = i;
-      indices[1] = j;
-      assert(abs((i+1.)*(j+1.) - uSquared.getComponent(indices)) < 1.0e-16);
+      assert(abs((i+1.)*(j+1.) - uSquared.get(i,j)) < 1.0e-16);
     }
   }
 }
@@ -95,30 +92,26 @@ double TestTensor::abs(double x) {
 void TestTensor::runScalarMultiplyTest() {
   Tensor tempA(rank, types);
   int indices[3];
+  double * components = tempA.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    tempA.setComponent(indices, i);
+    components[i] = i;
   }
 
   Tensor tempD = tempA;
   tempD *= 2.5;
+  double * componentsA = tempA.getComponents();
+  double * componentsD = tempD.getComponents();
+  std::cout.precision(16);
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    std::cout.precision(16);
     // This is exact in binary arithmetic since 2.5 = 2 + 2^-1
-    assert(abs(2.5*tempA.getComponent(indices)
-          - tempD.getComponent(indices))
-        < 1.0e-19);
+    assert(abs(2.5*componentsA[i] - componentsD[i]) < 1.0e-19);
   }
 
   Tensor tempE = 2.5*tempA;
+  double * componentsE = tempE.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    std::cout.precision(16);
     // This is exact in binary arithmetic since 2.5 = 2 + 2^-1
-    assert(abs(2.5*tempA.getComponent(indices)
-          - tempE.getComponent(indices))
-        < 1.0e-19);
+    assert(abs(2.5*componentsA[i] - componentsE[i]) < 1.0e-19);
   }
 }
 
@@ -154,47 +147,46 @@ void TestTensor::runIndexingTest() {
 
 void TestTensor::runLinearCombinationTest() {
   Tensor tempA(rank, types);
-  int indices[3];
+  double* componentsA = tempA.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    tempA.setComponent(indices, i);
+    componentsA[i] = i;
   }
 
   Tensor tempB =  3.0*tempA - 2.0*tempA;
+  double* componentsB = tempB.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    double a = tempA.getComponent(indices);
-    double c = tempB.getComponent(indices);
+    double a = componentsA[i];
+    double c = componentsB[i];
     assert(a == c);
   }
 
   Tensor tempD = tempA;
   tempD += (-1)*tempA;
+  double* componentsD = tempD.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    double c = tempD.getComponent(indices);
-    assert(c==0);
+    double c = componentsD[i];
+    assert(c == 0);
   }
 
   Tensor tempE = tempA + (-1)*tempA;
+  double* componentsE = tempE.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    double c = tempE.getComponent(indices);
+    double c = componentsE[i];
     assert(c==0);
   }
 
   Tensor tempF = tempA - tempA;
+  double* componentsF = tempF.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    double c = tempF.getComponent(indices);
+    double c = componentsF[i];
     assert(c==0);
   }
 
   Tensor tempG = tempA;
   tempG -= tempA;
+  double* componentsG = tempG.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    double c = tempG.getComponent(indices);
+    double c = componentsG[i];
     assert(c==0);
   }
 }

@@ -90,15 +90,6 @@ double * Tensor::getComponents() const {
   return components;
 }
 
-double Tensor::getComponent(int* indices) const {
-  int index1 = index(indices);
-  return components[index1];
-}
-
-void Tensor::setComponent(int* indices, double value) {
-  components[index(indices)] = value;
-}
-
 int Tensor::index(int* indices) const {
   int index = 0;
   int factor = 1;
@@ -157,9 +148,9 @@ Tensor Tensor::contract(int index1, int index2) const {
     for (int j = 0; j < DIMENSION; j++) {
       indices[index1] = j;
       indices[index2] = j;
-      value += getComponent(indices);
+      value += components[index(indices)];
     }
-    result.setComponent(resultIndices, value);
+    result.components[i] = value;
   }
   return result;
 }
@@ -251,8 +242,9 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
     result.indexToIndices(i, resultIndices);
     for (int j = 0; j < rank; j++) indices[j] = resultIndices[j];
     for (int j = 0; j < tensor.getRank(); j++) tensorIndices[j] = resultIndices[rank+j];
-    double value = getComponent(indices)*tensor.getComponent(tensorIndices);
-    result.setComponent(resultIndices, value);
+    double value = components[index(indices)]
+      *tensor.components[tensor.index(tensorIndices)];
+    result.components[i] = value;
   }
   return result.contract();
 }

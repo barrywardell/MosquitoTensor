@@ -45,25 +45,6 @@ class Tensor {
     Tensor(const Tensor &original);
 
     /**
-     * \brief Gets a component.
-     *
-     * \param indices The indices of the desired component starting at
-     * 0.
-     * \param value The value of the component to set.
-     * \retval component The selected component.
-     */
-    void setComponent(int* indices, double value);
-
-    /**
-     * \brief Gets a component.
-     *
-     * \param indices The indices of the desired component starting at
-     * 0.
-     * \retval component The selected component.
-     */
-    double getComponent(int* indices) const;
-
-    /**
      * \brief Returns a reference to the indexed component.
      * \param i1 The first index.
      * \param ... The next indices.
