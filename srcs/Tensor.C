@@ -235,9 +235,11 @@ Tensor Tensor::operator()(char i1, ...) {
       indexes[i] = va_arg(listPointer, int);
     }
     va_end(listPointer);
-    return (*this).contract();
+    Tensor copy = (*this).contract();
+    return copy;
   }
-  return (*this);
+  Tensor copy = *this;
+  return copy;
 }
 
 Tensor Tensor::contract() const {
