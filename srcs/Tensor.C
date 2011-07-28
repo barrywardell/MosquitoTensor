@@ -330,6 +330,7 @@ bool Tensor::permutation(char* indexes2, int* permute) const {
 }
 
 Tensor & Tensor::operator=(const Tensor & tensor) {
+  if (this == &tensor) return *this;
   assert(rank == tensor.getRank());
   int permute[rank];
   bool permutable = permutation(tensor.indexes, permute);
