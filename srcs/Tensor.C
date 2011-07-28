@@ -85,11 +85,11 @@ const Tensor::IndexType* Tensor::getTypes() const {
   return types;
 }
 
-double & Tensor::get(int* indices) const {
+double & Tensor::operator()(int* indices) const {
   return components[index(indices)];
 }
 
-double & Tensor::get(int i1, ...) const {
+double & Tensor::operator()(int i1, ...) const {
   if (rank == 0) {
     return components[0];
   } else {
@@ -214,7 +214,7 @@ Tensor & Tensor::operator+=(const Tensor &tensor) {
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     indexToIndices(i,indices);
     for (int j = 0; j < rank; j++) permutedIndices[j] = indices[permute[j]];
-    components[i] += tensor.get(permutedIndices);
+    components[i] += tensor(permutedIndices);
   }
   return *this;
 }

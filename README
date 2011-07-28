@@ -15,13 +15,18 @@ A brief outline:
 
 Tensor::IndexType down = Tensor::DOWN;
 Tensor eta(2, down, down);
-eta.get(0,0) = -1;
+eta(0,0) = -1;
 for (int i = 1; i < 4; i++) {
-  eta.get(i,i) = 1;
+  eta(i,i) = 1;
 }
 
 makes the Special Relativity metric tensor eta. Unspecified components
-are automatically zeroed.
+are automatically zeroed. One is then able to perform manipulations such
+as
+
+Tensor a = gamma["abc"]*u["b"]*u["c"];
+
+to contract the rank 3 Christoffel symbols with the four velocity.
 
 For better documentation, run doxygen by typing: 'make docs' and open
 docs/html/index.html for a better description. One could also read

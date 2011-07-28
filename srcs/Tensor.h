@@ -61,7 +61,7 @@ class Tensor {
      * \param ... The next indices.
      * \retval component The indexed component.
      */
-    double & get(int i1, ...) const;
+    double & operator()(int i1, ...) const;
 
     /**
      * \brief Returns a reference to the indexed component.
@@ -71,7 +71,7 @@ class Tensor {
      * \param indices The array of the indices specifying the component.
      * \retval component The indexed component.
      */
-    double & get(int* indices) const;
+    double & operator()(int* indices) const;
 
     /**
      * \brief Returns a pointer to the components.

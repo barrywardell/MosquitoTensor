@@ -17,7 +17,7 @@ Distributed under the Gnu general public license
  * \f]
  * using the following code
  * @code 
- *  Tensor a = M_PI*Gamma('a','b','c')*u('a')*u('c'); 
+ *  Tensor a = M_PI*Gamma["abc"]*u["b"]*u["c"];
  * @endcode
  * so long as the Tensors Gamma and u have been defined somewhere, and
  * have the correct IndexType. Dummy indexes are persistent, so be
@@ -47,7 +47,7 @@ Distributed under the Gnu general public license
  *  for (int i = 0; i < pow(DIMENSION, 3); i++) {
  *    gamma.indexToIndices(i, indices);
  *    double value = computeGamma(indices, t, x, y, z);
- *    gamma.get(indices) =  value;
+ *    gamma(indices) =  value;
  *  }
  * @endcode
  * where computeGamma() would be need to be a user defined function that
@@ -66,7 +66,7 @@ Distributed under the Gnu general public license
  * although this is a matter of taste. The individual components can
  * also be set manually:
  * @code
- *  gamma.get(1,0,0) = m*(r - 2*m)/pow(r, 3);
+ *  gamma(1,0,0) = m*(r - 2*m)/pow(r, 3);
  * @endcode
  * which would be the {r,tt} Christoffel symbol for the Schwarzschild
  * spacetime.
