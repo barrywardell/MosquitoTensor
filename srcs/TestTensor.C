@@ -53,7 +53,7 @@ void TestTensor::runContractionTest() {
   Tensor scalar3 = uv2.contract(0,1);
   assert(scalar3.get(0) == 4.);
 
-  Tensor scalar4 = u('a')*v('a');
+  Tensor scalar4 = u["a"]*v["a"];
   assert(scalar4.getRank() == 0);
   assert(scalar4.get(0) == 4.);
 
@@ -65,7 +65,7 @@ void TestTensor::runContractionTest() {
   test0.get(2,2) = 3;
   test0.get(3,3) = 4;
   test0.get(3,4) = -100000;
-  Tensor scalar5 = test0('a','a');
+  Tensor scalar5 = test0["aa"];
   assert(scalar5.get(0) == 0.);
 }
 
@@ -150,7 +150,7 @@ void TestTensor::runIndexingTest() {
   Tensor::IndexType up = Tensor::UP;
   Tensor::IndexType down = Tensor::DOWN;
   Tensor gamma(3,up,down,down);
-  gamma('a','b','c');
+  gamma["abc"];
   gamma.permutation(gamma.indexes, permute);
   for (int i = 0; i < 3; i++) {
     assert(i == permute[i]);
@@ -168,7 +168,7 @@ void TestTensor::runLinearCombinationTest() {
     componentsA[i] = i;
   }
 
-  Tensor tempB =  3.0*tempA('a','b','c') - 2.0*tempA('a','b','c');
+  Tensor tempB =  3.0*tempA["abc"] - 2.0*tempA["abc"];
   double* componentsB = tempB.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double a = componentsA[i];
@@ -176,30 +176,30 @@ void TestTensor::runLinearCombinationTest() {
     assert(a == c);
   }
 
-  Tensor tempD = tempA('a','b','c');
-  tempD += (-1)*tempA('a','b','c');
+  Tensor tempD = tempA["abc"];
+  tempD += (-1)*tempA["abc"];
   double* componentsD = tempD.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsD[i];
     assert(c == 0);
   }
 
-  Tensor tempE = tempA('a','b','c') + (-1)*tempA('a','b','c');
+  Tensor tempE = tempA["abc"] + (-1)*tempA["abc"];
   double* componentsE = tempE.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsE[i];
     assert(c==0);
   }
 
-  Tensor tempF = tempA('a','b','c') - tempA('a','b','c');
+  Tensor tempF = tempA["abc"] - tempA["abc"];
   double* componentsF = tempF.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsF[i];
     assert(c==0);
   }
 
-  Tensor tempG = tempA('a','b','c');
-  tempG -= tempA('a','b','c');
+  Tensor tempG = tempA["abc"];
+  tempG -= tempA["abc"];
   double* componentsG = tempG.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsG[i];
@@ -216,7 +216,7 @@ void TestTensor::runLinearCombinationTest() {
       tempI.get(i,j) = ipow((j+1),i);
     }
   }
-  Tensor tempJ = tempH('a','b') - tempI('b','a');
+  Tensor tempJ = tempH["ab"] - tempI["ba"];
   for (int i = 0; i < ipow(DIMENSION, 2); i++) {
     assert(tempJ.components[i] == 0);
   }

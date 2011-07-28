@@ -231,23 +231,10 @@ Tensor Tensor::operator+(const Tensor &tensor) const {
   return result;
 }
 
-Tensor Tensor::operator()(char i1, ...) {
-  if (i1 == 0 || rank == 1) {
-    for (int i = 0; i < rank; i++) indexes[i] = i1;
-  } else if (rank > 0) {
-    va_list listPointer;
-    va_start(listPointer, i1);
-    indexes[0] = i1;
-    for (int i = 1; i < rank; i++) {
-      // Mysterious? If the following were char, icpc produces
-      // warning #1340: "char" would have been promoted to "int" when
-      // passed through the ellipsis parameter; use the latter type
-      // instead
-      indexes[i] = va_arg(listPointer, int);
-    }
-    va_end(listPointer);
-    Tensor copy = (*this).contract();
-    return copy;
+Tensor Tensor::operator[](char* names) {
+  for (int i = 0; i < rank; i++) {
+    indexes[i] = names[i];
+    assert(names[i] != '\0'); // Ensure that there are enough indices.
   }
   Tensor copy = *this;
   return copy;

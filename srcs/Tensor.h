@@ -142,17 +142,20 @@ class Tensor {
     /**
      * \brief Names the indices.
      *
-     * Indexing operation. Sets the abstract indexes or nulls them, for
-     * safety. If an index is 0, '.' or '-', it will not be summed over.
-     * Otherwise, identical indexes are contracted. If one has delta^a_b
-     * and then calls delta(a,a), then contraction will be performed.
+     * Indexing operation. Sets the abstract indexes. Indexes which are
+     * null or '.' or '-' are not summed over.
+     * Identical indexes are contracted so long as one is contravariant
+     * and the other is covariant. If one has delta^a_b
+     * and then calls delta(a,a), then contraction will be performed
+     * while delta^{ab} with delta['aa'] is inconsistent and will assert
+     * and abort.
      *
-     * Initial values are 0.
+     * Initial values are null.
      * \param i1 The first index or NULL, to remove all indices.
      * \param ... The va_list of other indexes.
      * \retval this The indexed tensor, possibly with indexes contracted.
      */
-    Tensor operator()(char i1, ...);
+    Tensor operator[](char* names);
 
     /**
      * \brief Destructor.
