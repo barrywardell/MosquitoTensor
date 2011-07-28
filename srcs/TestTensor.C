@@ -157,6 +157,10 @@ void TestTensor::runIndexingTest() {
   }
 }
 
+void debug(int i) {
+  std::cout << "Got here " << i << "\n";
+}
+
 void TestTensor::runLinearCombinationTest() {
   Tensor tempA(rank, types);
   double* componentsA = tempA.getComponents();
@@ -164,7 +168,7 @@ void TestTensor::runLinearCombinationTest() {
     componentsA[i] = i;
   }
 
-  Tensor tempB =  3.0*tempA - 2.0*tempA;
+  Tensor tempB =  3.0*tempA('a','b','c') - 2.0*tempA('a','b','c');
   double* componentsB = tempB.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double a = componentsA[i];
@@ -172,35 +176,52 @@ void TestTensor::runLinearCombinationTest() {
     assert(a == c);
   }
 
-  Tensor tempD = tempA;
-  tempD += (-1)*tempA;
+  Tensor tempD = tempA('a','b','c');
+  tempD += (-1)*tempA('a','b','c');
   double* componentsD = tempD.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsD[i];
     assert(c == 0);
   }
 
-  Tensor tempE = tempA + (-1)*tempA;
+  Tensor tempE = tempA('a','b','c') + (-1)*tempA('a','b','c');
   double* componentsE = tempE.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsE[i];
     assert(c==0);
   }
 
-  Tensor tempF = tempA - tempA;
+  Tensor tempF = tempA('a','b','c') - tempA('a','b','c');
   double* componentsF = tempF.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsF[i];
     assert(c==0);
   }
 
-  Tensor tempG = tempA;
-  tempG -= tempA;
+  Tensor tempG = tempA('a','b','c');
+  tempG -= tempA('a','b','c');
   double* componentsG = tempG.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsG[i];
     assert(c==0);
   }
+
+  IndexType down = Tensor::DOWN;
+  IndexType up = Tensor::UP;
+  Tensor tempH(2, down, up);
+  Tensor tempI(2, up, down);
+  for (int i = 0; i < DIMENSION; i++) {
+    for (int j = 0; j < DIMENSION; j++) {
+      tempH.get(i,j) = ipow((i+1),j);
+      tempI.get(i,j) = ipow((j+1),i);
+    }
+  }
+  Tensor tempJ = tempH('a','b') - tempI('b','a');
+  for (int i = 0; i < ipow(DIMENSION, 2); i++) {
+    assert(tempJ.components[i] == 0);
+  }
+  // This fails. As it should.
+  // Tensor tempJJ = tempH('b','a') - tempI('b','a');
 }
 
 int main() {

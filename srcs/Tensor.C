@@ -198,12 +198,23 @@ Tensor & Tensor::operator*=(const double scalar) {
 }
 
 Tensor & Tensor::operator+=(const Tensor &tensor) {
+  // Check indexing.
+  int permute[rank];
+  int indices[rank];
+  int permutedIndices[rank];
+  bool permutable = permutation(tensor.indexes, permute);
+  assert(permutable);
+
+  // Check to make sure permuted indexes are equal.
   const Tensor::IndexType* tensorTypes = tensor.getTypes();
   for (int i = 0; i < rank; i++) {
-    assert(tensorTypes[i] == types[i]);
+    assert(types[i] == tensorTypes[permute[i]]);
   }
+
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    components[i] += tensor.components[i];
+    indexToIndices(i,indices);
+    for (int j = 0; j < rank; j++) permutedIndices[j] = indices[permute[j]];
+    components[i] += tensor.get(permutedIndices);
   }
   return *this;
 }
@@ -289,8 +300,9 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
 bool Tensor::permutation(char* indexes2, int* permute) const {
   for (int i = 0; i < rank; i++) {
     bool indexFound = false;
-    for (int j = 0; !indexFound ; j++) {
-      if (indexes[j] == indexes[i]) {
+    assert(indexes[i] != NULL);
+    for (int j = 0; !indexFound && indexes2[j] != '\0' ; j++) {
+      if (indexes[i] == indexes2[j]) {
         permute[i] = j;
         indexFound = true;
       }
