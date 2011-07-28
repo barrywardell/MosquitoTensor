@@ -28,7 +28,7 @@ class Tensor {
     };
 
     /**
-     * \brief Default constructor.
+     * \brief Constructor.
      *
      * Creates the point tensor. Sets the rank, creates storage, zeros
      * the components and sets the contravariant/covariant type of the
@@ -39,7 +39,7 @@ class Tensor {
     Tensor(int Rank, ...);
 
     /**
-     * \brief Default constructor.
+     * \brief Constructor.
      *
      * Creates the point tensor. Sets the rank, creates storage, zeros
      * the components and sets the contravariant/covariant type of the
@@ -48,6 +48,18 @@ class Tensor {
      * \param Types The types of the indices.
      */
     Tensor(int Rank, const IndexType* Types);
+
+    /**
+     * \brief Constructor from character array.
+     * Sets the rank, type of index, and name of index at construction
+     * time. Index string must be of form "^a^b_c^d", that is, it must
+     * be one of "^" or "_" followed by another character. These
+     * characters should be unique, so that a contraction is not
+     * performed over the initialised tensor. See contract() for
+     * information about indexes.
+     * \param indexString The character array defining the tensor type.
+     */
+    Tensor(char* indexString);
 
     /**
      * Copy constructor.
@@ -225,6 +237,16 @@ class Tensor {
     Tensor operator-(const Tensor &tensor) const {
       return operator+((-1)*tensor);
     };
+
+    /**
+     * \brief Assignment operator.
+     * Tensor to be assigned must have same rank and permutable indices.
+     * The index types must be the same.
+     * \param tensor The tensor to assign to the one to the left hand
+     * side.
+     * \retval lhs A reference to the tensor on the left hand side.
+     */
+    Tensor & operator=(const Tensor &tensor);
 
     /**
      * \brief Scalar multiplication is commutative.

@@ -155,6 +155,10 @@ void TestTensor::runIndexingTest() {
   for (int i = 0; i < 3; i++) {
     assert(i == permute[i]);
   }
+
+  Tensor christoffel("^a_b_c");
+  Tensor somethingElse("_b^a_c");
+  christoffel = somethingElse;
 }
 
 void debug(int i) {
@@ -222,6 +226,27 @@ void TestTensor::runLinearCombinationTest() {
   }
   // This fails. As it should.
   // Tensor tempJJ = tempH('b','a') - tempI('b','a');
+
+  // build an antisymmetric tensor.
+  Tensor tempK("_a_b");
+  for (int i = 0; i < DIMENSION; i++) {
+    for (int j = 0; j < i; j++) {
+      tempK(i,j) = ipow(i+1, j);
+    }
+  }
+  for (int j = 0; j < DIMENSION; j++) {
+    for (int i = 0; i < j; i++) {
+      tempK(i,j) = -tempK(j,i);
+    }
+  }
+  Tensor tempL("_b_a");
+  tempL = tempK["ab"];
+  Tensor tempM = tempL["ab"] + tempK["ab"];
+  for (int i = 0; i < DIMENSION; i++) {
+    for (int j = 0; j < DIMENSION; j++) {
+      assert(tempM(i,j) == 0);
+    }
+  }
 }
 
 int main() {

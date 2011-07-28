@@ -13,8 +13,7 @@ link to this.
 
 A brief outline:
 
-Tensor::IndexType down = Tensor::DOWN;
-Tensor eta(2, down, down);
+Tensor eta("_a_b");
 eta(0,0) = -1;
 for (int i = 1; i < 4; i++) {
   eta(i,i) = 1;

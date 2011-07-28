@@ -9,7 +9,7 @@ Distributed under the Gnu general public license
  * macroed to be 4, although in principle this is an easy change to
  * make.
  *
- * @section MAINPAGE Usage overview
+ * @section OVERVIEW Usage overview
  * The usual arithmetic operations have been overloaded. So one may
  * perform the following computation:
  * \f[
@@ -28,7 +28,7 @@ Distributed under the Gnu general public license
  * and operations such as addition and contraction have requirements on
  * the index types (character) of the tensors.
  *
- * @section MAINPAGE Creating a new tensor
+ * @section CREATION Creating a new tensor
  * Tensors must be created with a rank and tensor index types. The
  * following code produces the Christoffel symbols of the second type:
  * @code
@@ -38,9 +38,14 @@ Distributed under the Gnu general public license
  * @endcode
  * while the individual components would be set with calls to
  * Tensor::setComponent(). All of the tensor components are initially
- * set to zero.
+ * set to zero. The easiest way to specify a new tensor is via a string
+ * literal:
+ * @code
+ *  Tensor Gamma("^a_b_c");
+ * @endcode
+ * which also labels the individual components.
  *
- * @section MAINPAGE Working with components
+ * @section COMPONENTS Working with components
  * Indexing functions are provided to make looping easy.
  * @code
  *  int indices[3];
@@ -70,4 +75,26 @@ Distributed under the Gnu general public license
  * @endcode
  * which would be the {r,tt} Christoffel symbol for the Schwarzschild
  * spacetime.
+ *
+ * @section ARITHMETIC Arithmetic
+ * It is possible to multiply by a scalar, multiply by a tensor and to
+ * add tensors. As an example, in order to compute
+ * \f[
+ *  v^a{}_{dc} = \pi\Gamma^a{}_{bc}\sigma^b{}_d + \sigma^a{}_du_c
+ * \f]
+ * one would write
+ * @code
+ *  Tensor Gamma("^a_b_c");
+ *  Tensor sigma("^a_b");
+ *  Tensor u("_b");
+ *  Tensor v("^a_d_c");
+ *  v = M_PI*Gamma["abc"]*sigma["bd"] + sigma["ad"]*u["c"];
+ * @endcode
+ * One should note that in order to use the assignment operator, the
+ * tensor must already have been created, the following would not work:
+ * @code
+ *  v["adc"] = M_PI*Gamma["abc"]*sigma["bd"] + sigma["ad"]*u["c"];
+ * @endcode
+ * since the indexing operator [] returns a copy which is in this case
+ * not assigned to anything; v would be unchanged.
  */

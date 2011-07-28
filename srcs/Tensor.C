@@ -13,6 +13,36 @@ int Tensor::ipow(int i, int j) const {
   return retValue;
 }
 
+Tensor::Tensor(char* indexString) {
+  // Determine rank.
+  rank = -1;
+  for (int i = 0; i < 33 && rank < 0; i++) { 
+    if (indexString[i] == '\0') {
+      rank = i/2;
+    }
+  }
+  assert(rank > 0);
+
+  // Initialise.
+  types = new IndexType[rank];
+  indexes = new char[rank];
+  components = new double[ipow(DIMENSION, rank)];
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) components[i] = 0;
+
+  // Determine index type and label.
+  for (int i = 0; i < rank; i++) {
+    if (indexString[2*i] == '^') {
+      types[i] = UP;
+      indexes[i] = indexString[2*i + 1];
+    } else if (indexString[2*i] == '_') {
+      types[i] = DOWN;
+      indexes[i] = indexString[2*i + 1];
+    } else {
+      assert(false);
+    }
+  }
+}
+
 Tensor::Tensor(int Rank, ...) {
   if (Rank == 0) {
     init(Rank,NULL);
@@ -297,4 +327,24 @@ bool Tensor::permutation(char* indexes2, int* permute) const {
     if (!indexFound) return false;
   }
   return true;
+}
+
+Tensor & Tensor::operator=(const Tensor & tensor) {
+  assert(rank == tensor.getRank());
+  int permute[rank];
+  bool permutable = permutation(tensor.indexes, permute);
+  assert(permutable);
+  const Tensor::IndexType* tensorTypes = tensor.getTypes();
+  for (int i = 0; i < rank; i++) {
+    assert(types[i] == tensorTypes[permute[i]]);
+  }
+
+  // Now assign components.
+  int indices[rank], permutedIndices[rank];
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
+    indexToIndices(i,indices);
+    for (int j = 0; j < rank; j++) permutedIndices[j] = indices[permute[j]];
+    components[i] = tensor(permutedIndices);
+  }
+  return *this;
 }
