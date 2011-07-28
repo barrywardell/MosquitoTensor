@@ -293,6 +293,22 @@ class Tensor {
      * \param Types The types of the indices.
      */
     void init(int Rank, const IndexType* Types);
+
+    /**
+     * \brief Returns the permutation vector which defines how to
+     * rearrange indices.
+     *
+     * Used so that one may properly perform Ricci calculus. In
+     * particular one wants to be able to perform operations like:
+     * \f[
+     *  h_{ab} = T^a{}_b+U_b{}^a
+     * \f]
+     * \param indexes2 The indexes of the other (second) tensor.
+     * \param permute The vector to store the permutation in.
+     * \retval permutable A boolean which states whether indexes2 is a
+     * permutation of this tensor's indexes or not.
+     */
+    bool permutation(char* indexes2, int* permute) const;
 };
 
 #endif

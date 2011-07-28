@@ -145,6 +145,16 @@ void TestTensor::runIndexingTest() {
     indexToIndices(i, indices);
     assert(i == index(indices));
   }
+
+  int permute[rank];
+  Tensor::IndexType up = Tensor::UP;
+  Tensor::IndexType down = Tensor::DOWN;
+  Tensor gamma(3,up,down,down);
+  gamma('a','b','c');
+  gamma.permutation(gamma.indexes, permute);
+  for (int i = 0; i < 3; i++) {
+    assert(i == permute[i]);
+  }
 }
 
 void TestTensor::runLinearCombinationTest() {

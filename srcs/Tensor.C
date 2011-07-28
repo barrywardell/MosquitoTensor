@@ -285,3 +285,17 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
   }
   return result.contract();
 }
+
+bool Tensor::permutation(char* indexes2, int* permute) const {
+  for (int i = 0; i < rank; i++) {
+    bool indexFound = false;
+    for (int j = 0; !indexFound ; j++) {
+      if (indexes[j] == indexes[i]) {
+        permute[i] = j;
+        indexFound = true;
+      }
+    }
+    if (!indexFound) return false;
+  }
+  return true;
+}
