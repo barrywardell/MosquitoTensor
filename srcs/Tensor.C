@@ -349,3 +349,21 @@ Tensor & Tensor::operator=(const Tensor & tensor) {
   }
   return *this;
 }
+
+int Tensor::setComponents(const double* v)
+{
+  int i;
+  for (i = 0; i < ipow(DIMENSION, rank); i++) {
+    components[i] = v[i];
+  }
+  return i+1;
+}
+
+int Tensor::getComponents(double* v)
+{
+  int i;
+  for (i = 0; i < ipow(DIMENSION, rank); i++) {
+    v[i] = components[i];
+  }
+  return i+1;
+}
