@@ -13,7 +13,9 @@ int Tensor::ipow(int i, int j) const {
   return retValue;
 }
 
-Tensor::Tensor(const char* indexString) {
+Tensor::Tensor(const char* indexString, double* data)
+ : deleteComponents(false)
+{
   // Determine rank.
   rank = -1;
   for (int i = 0; i < 33 && rank < 0; i++) { 
@@ -26,7 +28,14 @@ Tensor::Tensor(const char* indexString) {
   // Initialise.
   types = new IndexType[rank];
   indexes = new char[rank];
-  components = new double[ipow(DIMENSION, rank)];
+
+  // Initialize components array if it is not given
+  if(!data)
+  {
+    components = new double[ipow(DIMENSION, rank)];
+    deleteComponents = true;
+  }
+
   for (int i = 0; i < ipow(DIMENSION, rank); i++) components[i] = 0;
 
   // Determine index type and label.
@@ -167,7 +176,8 @@ int Tensor::index(int* indices) const {
 
 Tensor::~Tensor() {
   delete[] types;
-  delete[] components;
+  if(deleteComponents)
+    delete[] components;
 }
 
 void Tensor::indexToIndices(int index, int* indices) const {

@@ -57,9 +57,12 @@ class Tensor {
      * characters should be unique, so that a contraction is not
      * performed over the initialised tensor. See contract() for
      * information about indexes.
+     * If the data pointer is not given or is null then a new array of the
+     * appropriate size is created and initialized.
      * \param indexString The character array defining the tensor type.
+     * \param data Pointer to an array where the components are stored
      */
-    Tensor(const char* indexString);
+    Tensor(const char* indexString, double *data = 0);
 
     /**
      * Copy constructor.
@@ -356,6 +359,16 @@ class Tensor {
      * permutation of this tensor's indexes or not.
      */
     bool permutation(char* indexes2, int* permute) const;
+
+    /**
+     * \brief Whether to delete components array in destructor
+     *
+     * The components array may be either allocated when the object is created
+     * or it may be passed as an argument to the constructor. When the
+     * destructor is called, this array should only be deleted in the former
+     * case. This flags whether the deletion should happen or not
+     */
+    bool deleteComponents;
 };
 
 #endif
