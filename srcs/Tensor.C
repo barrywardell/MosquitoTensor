@@ -317,7 +317,7 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
 bool Tensor::permutation(char* indexes2, int* permute) const {
   for (int i = 0; i < rank; i++) {
     bool indexFound = false;
-    assert(indexes[i] != NULL);
+    assert(indexes[i]);
     for (int j = 0; !indexFound && indexes2[j] != '\0' ; j++) {
       if (indexes[i] == indexes2[j]) {
         permute[i] = j;
