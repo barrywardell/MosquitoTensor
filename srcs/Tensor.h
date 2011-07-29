@@ -188,8 +188,7 @@ class Tensor {
      * and abort.
      *
      * Initial values are null.
-     * \param i1 The first index or NULL, to remove all indices.
-     * \param ... The va_list of other indexes.
+     * \param names The list of indices
      * \retval this The indexed tensor, possibly with indexes contracted.
      */
     Tensor operator[](const char* names);
