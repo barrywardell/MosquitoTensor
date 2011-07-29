@@ -13,7 +13,7 @@ int Tensor::ipow(int i, int j) const {
   return retValue;
 }
 
-Tensor::Tensor(char* indexString) {
+Tensor::Tensor(const char* indexString) {
   // Determine rank.
   rank = -1;
   for (int i = 0; i < 33 && rank < 0; i++) { 
@@ -261,7 +261,7 @@ Tensor Tensor::operator+(const Tensor &tensor) const {
   return result;
 }
 
-Tensor Tensor::operator[](char* names) {
+Tensor Tensor::operator[](const char* names) {
   for (int i = 0; i < rank; i++) {
     indexes[i] = names[i];
     assert(names[i] != '\0'); // Ensure that there are enough indices.
@@ -317,7 +317,7 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
 bool Tensor::permutation(char* indexes2, int* permute) const {
   for (int i = 0; i < rank; i++) {
     bool indexFound = false;
-    assert(indexes[i] != NULL);
+    assert(indexes[i]);
     for (int j = 0; !indexFound && indexes2[j] != '\0' ; j++) {
       if (indexes[i] == indexes2[j]) {
         permute[i] = j;
@@ -348,4 +348,22 @@ Tensor & Tensor::operator=(const Tensor & tensor) {
     components[i] = tensor(permutedIndices);
   }
   return *this;
+}
+
+int Tensor::setComponents(const double* v)
+{
+  int i;
+  for (i = 0; i < ipow(DIMENSION, rank); i++) {
+    components[i] = v[i];
+  }
+  return i+1;
+}
+
+int Tensor::getComponents(double* v)
+{
+  int i;
+  for (i = 0; i < ipow(DIMENSION, rank); i++) {
+    v[i] = components[i];
+  }
+  return i+1;
 }

@@ -59,7 +59,7 @@ class Tensor {
      * information about indexes.
      * \param indexString The character array defining the tensor type.
      */
-    Tensor(char* indexString);
+    Tensor(const char* indexString);
 
     /**
      * Copy constructor.
@@ -94,6 +94,28 @@ class Tensor {
      * \retval components A pointer to the array storing the components.
      */
     double* getComponents() const;
+
+    /**
+     * \brief Copy all components to an array of doubles
+     *
+     * This routine is provided so one can quickly output all the data to
+     * a C array of doubles. It is assumed that the array has been allocated
+     * and is at least as large as the number of tensor components.
+     * \param array A pointer to a double array for the data
+     * \retval num The number of components copied
+     */
+    int getComponents(double* array);
+
+    /**
+     * \brief Copy all components from an array of doubles
+     *
+     * This routine is provided so one can quickly set all the data from
+     * a C array of doubles. It is assumed that the array has been allocated
+     * and is at least as large as the number of tensor components.
+     * \param array A pointer to a double array containing the data
+     * \retval num The number of components copied
+     */
+    int setComponents(const double* array);
 
     /**
      * \brief An indexing function. 
@@ -167,7 +189,7 @@ class Tensor {
      * \param ... The va_list of other indexes.
      * \retval this The indexed tensor, possibly with indexes contracted.
      */
-    Tensor operator[](char* names);
+    Tensor operator[](const char* names);
 
     /**
      * \brief Destructor.
