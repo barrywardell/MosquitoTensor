@@ -59,7 +59,7 @@ class Tensor {
      * information about indexes.
      * \param indexString The character array defining the tensor type.
      */
-    Tensor(char* indexString);
+    Tensor(const char* indexString);
 
     /**
      * Copy constructor.
@@ -167,7 +167,7 @@ class Tensor {
      * \param ... The va_list of other indexes.
      * \retval this The indexed tensor, possibly with indexes contracted.
      */
-    Tensor operator[](char* names);
+    Tensor operator[](const char* names);
 
     /**
      * \brief Destructor.
