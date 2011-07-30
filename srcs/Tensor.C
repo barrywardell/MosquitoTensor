@@ -128,6 +128,11 @@ double & Tensor::operator()(int* indices) const {
   return components[index(indices)];
 }
 
+double & Tensor::operator()() const {
+  assert(rank == 0);
+  return components[0];
+}
+
 double & Tensor::operator()(int i1, ...) const {
   if (rank == 0) {
     return components[0];
