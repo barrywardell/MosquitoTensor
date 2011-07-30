@@ -107,7 +107,7 @@ class Tensor {
      * \param array A pointer to a double array for the data
      * \retval num The number of components copied
      */
-    int getComponents(double* array);
+    int getComponents(double* array) const;
 
     /**
      * \brief Copy all components from an array of doubles

@@ -369,7 +369,7 @@ int Tensor::setComponents(const double* v)
   return i+1;
 }
 
-int Tensor::getComponents(double* v)
+int Tensor::getComponents(double* v) const
 {
   int i;
   for (i = 0; i < ipow(DIMENSION, rank); i++) {
