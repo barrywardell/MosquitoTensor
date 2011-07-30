@@ -36,7 +36,7 @@ class Tensor {
      * \param Rank The rank of the tensor.
      * \param ... The types of the indices.
      */
-    Tensor(int Rank, ...);
+    Tensor(int Rank = 0, ...);
 
     /**
      * \brief Constructor.
