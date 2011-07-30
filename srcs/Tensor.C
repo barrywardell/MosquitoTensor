@@ -377,3 +377,8 @@ int Tensor::getComponents(double* v)
   }
   return i+1;
 }
+
+int Tensor::getNumComponents() const
+{
+  return ipow(DIMENSION, rank);
+}

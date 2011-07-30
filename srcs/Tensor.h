@@ -121,6 +121,13 @@ class Tensor {
     int setComponents(const double* array);
 
     /**
+     * \brief The number of components in the tensor
+     *
+     * \retval num The number of components
+     */
+    int getNumComponents() const;
+
+    /**
      * \brief An indexing function. 
      *
      * To abstract away the storage model. Converts n=rank indices into a
