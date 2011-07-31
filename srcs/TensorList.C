@@ -29,16 +29,14 @@ Tensor& TensorList::operator[](const char* name)
 
 void TensorList::append(const char *name, const char *indexString)
 {
-  Tensor t(indexString);
-  tensors.insert(map<string, Tensor>::value_type(name, t));
-  numComponents += t.getNumComponents();
+  tensors.insert(map<string, Tensor>::value_type(name, indexString));
+  numComponents += tensors[name].getNumComponents();
 }
 
 void TensorList::append(const char *name)
 {
-  Tensor t;
-  tensors.insert(map<string, Tensor>::value_type(name, t));
-  numComponents += t.getNumComponents();
+  tensors.insert(map<string, Tensor>::value_type(name, 0));
+  numComponents += tensors[name].getNumComponents();
 }
 
 int TensorList::getComponents(double* array)
