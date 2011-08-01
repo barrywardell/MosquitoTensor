@@ -115,6 +115,12 @@ void TestTensor::runScalarMultiplyTest() {
     // This is exact in binary arithmetic since 2.5 = 2 + 2^-1
     assert(abs(2.5*componentsA[i] - componentsE[i]) < 1.0e-19);
   }
+
+  Tensor tempF = 2.*tempA;
+  Tensor tempAA = tempF/2.;
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
+    assert(tempAA.components[i] == tempA.components[i]);
+  }
 }
 
 void TestTensor::runTests() {

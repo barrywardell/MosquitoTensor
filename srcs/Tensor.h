@@ -205,6 +205,17 @@ class Tensor {
     Tensor & operator*=(const double scalar);
 
     /**
+     * \brief Scalar inplace division.
+     *
+     * \param scalar The scalar to divide by.
+     * \retval this A reference to this tensor.
+     */
+    Tensor & operator/=(const double scalar) {
+      (*this) *= 1./scalar;
+      return *this;
+    }
+
+    /**
      * \brief Inplace addition.
      *
      * \param tensor The tensor to add to this tensor.
@@ -258,6 +269,15 @@ class Tensor {
      */
     Tensor operator-(const Tensor &tensor) const {
       return operator+((-1)*tensor);
+    };
+
+    /**
+     * \brief Division.
+     * \param scalar The scalar to divide by.
+     * \retval A new tensor equal to this one divided by the argument.
+     */
+    Tensor operator/(double scalar) const {
+      return operator*(1./scalar);
     };
 
     /**
