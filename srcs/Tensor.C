@@ -5,6 +5,8 @@
 #include "Tensor.h"
 #define DIMENSION 4
 
+using namespace Mosquito;
+
 int Tensor::ipow(int i, int j) const {
   int retValue = 1;
   for (int k = 0; k < j; k++) {

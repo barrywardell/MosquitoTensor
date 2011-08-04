@@ -8,6 +8,8 @@
 
 #define DIMENSION 4
 
+using namespace Mosquito;
+
 int ipow(int i, int j);
 
 class TestTensor: public Tensor {
