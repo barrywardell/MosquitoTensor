@@ -52,7 +52,9 @@ void TestTensor::runContractionTest() {
     v(i) = 1;
   }
   Tensor uv2 = u*v;
-  Tensor scalar3 = uv2.contract(0,1);
+//  Tensor scalar3 = uv2.contract(0,1);
+  Tensor scalar3("");
+  scalar3.it("") = uv2.it("aa");
   assert(scalar3(0) == 4.);
 
   Tensor scalar4 = u["a"]*v["a"];
@@ -129,10 +131,10 @@ void TestTensor::runTests() {
   std::cout << "Running tests on class Tensor.\n";
   int nTests = 0;
 
-  runLinearCombinationTest();
+  runIndexingTest();
   nTests++; std::cout << ".\n";
 
-  runIndexingTest();
+  runLinearCombinationTest();
   nTests++; std::cout << ".\n";
 
   runScalarMultiplyTest();

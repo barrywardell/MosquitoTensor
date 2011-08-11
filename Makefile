@@ -11,7 +11,7 @@ COMMONLIBS=
 INCLUDES=
 PROGRAMS := TestTensor
 
-TestTensor_files := TestTensor.C Tensor.C
+TestTensor_files := TestTensor.C Tensor.C TensorBase.C IndexedTensor.C
 
 #######################################################################
 #

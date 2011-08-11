@@ -7,14 +7,6 @@
 
 using namespace Mosquito;
 
-int Tensor::ipow(int i, int j) const {
-  int retValue = 1;
-  for (int k = 0; k < j; k++) {
-    retValue *= i;
-  }
-  return retValue;
-}
-
 Tensor::Tensor(const char* indexString) {
   // Determine rank.
   rank = -1;
@@ -23,7 +15,7 @@ Tensor::Tensor(const char* indexString) {
       rank = i/2;
     }
   }
-  assert(rank > 0);
+  assert(rank >= 0);
 
   // Initialise.
   types = new IndexType[rank];
@@ -109,74 +101,9 @@ Tensor::Tensor(const Tensor &original) {
   }
 }
 
-int Tensor::getRank() const {
-  return rank;
-}
-
-const Tensor::IndexType* Tensor::getTypes() const {
-  return types;
-}
-
-double & Tensor::operator()(int* indices) const {
-  return components[index(indices)];
-}
-
-double & Tensor::operator()(int i1, ...) const {
-  if (rank == 0) {
-    return components[0];
-  } else {
-    int indices[rank];
-    indices[0] = i1;
-    va_list listPointer;
-    va_start(listPointer, i1);
-    for (int i = 1; i < rank; i++) {
-      indices[i] = va_arg(listPointer, int);
-    }
-    va_end(listPointer);
-    return components[index(indices)];
-  }
-}
-
-double * Tensor::getComponents() const {
-  return components;
-}
-
-int Tensor::index(int i1, ...) const {
-  if (rank == 0) {
-    return 0;
-  } else {
-    int indices[rank];
-    indices[0] = i1;
-    va_list listPointer;
-    va_start(listPointer, i1);
-    for (int i = 1; i < rank; i++) {
-      indices[i] = va_arg(listPointer, int);
-    }
-    va_end(listPointer);
-    return index(indices);
-  }
-}
-
-int Tensor::index(int* indices) const {
-  int index = 0;
-  int factor = 1;
-  for (int j = rank-1; j >= 0; j--) {
-    index += factor*indices[j];
-    factor *= DIMENSION;
-  }
-  return index;
-}
-
 Tensor::~Tensor() {
   delete[] types;
   delete[] components;
-}
-
-void Tensor::indexToIndices(int index, int* indices) const {
-  for (int i = rank-1; i >= 0; i--) {
-    indices[i] = index%DIMENSION;
-    index /= DIMENSION;
-  }
 }
 
 Tensor Tensor::contract(int index1, int index2) const {
@@ -263,7 +190,12 @@ Tensor Tensor::operator+(const Tensor &tensor) const {
   return result;
 }
 
-Tensor Tensor::operator[](const char* names) {
+IndexedTensor Tensor::it(char* names) {
+  IndexedTensor indexed(rank, types, components, names);
+  return indexed;
+}
+
+Tensor Tensor::operator[](char* names) {
   for (int i = 0; i < rank; i++) {
     indexes[i] = names[i];
     assert(names[i] != '\0'); // Ensure that there are enough indices.
@@ -350,22 +282,4 @@ Tensor & Tensor::operator=(const Tensor & tensor) {
     components[i] = tensor(permutedIndices);
   }
   return *this;
-}
-
-int Tensor::setComponents(const double* v)
-{
-  int i;
-  for (i = 0; i < ipow(DIMENSION, rank); i++) {
-    components[i] = v[i];
-  }
-  return i+1;
-}
-
-int Tensor::getComponents(double* v)
-{
-  int i;
-  for (i = 0; i < ipow(DIMENSION, rank); i++) {
-    v[i] = components[i];
-  }
-  return i+1;
 }
