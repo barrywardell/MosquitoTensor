@@ -7,7 +7,8 @@
 
 using namespace Mosquito;
 
-Tensor::Tensor(const char* indexString) {
+Tensor::Tensor(const char* indexString, double* data)
+ : deleteComponents(false) {
   // Determine rank.
   rank = -1;
   for (int i = 0; i < 33 && rank < 0; i++) { 
@@ -19,7 +20,15 @@ Tensor::Tensor(const char* indexString) {
 
   // Initialise.
   types = new IndexType[rank];
-  components = new double[ipow(DIMENSION, rank)];
+
+  // Initialize components array if it is not given
+  if(!data) {
+    components = new double[ipow(DIMENSION, rank)];
+    deleteComponents = true;
+  } else {
+    components = data;
+  }
+
   for (int i = 0; i < ipow(DIMENSION, rank); i++) components[i] = 0;
 
   // Determine index type and label.
@@ -81,6 +90,7 @@ Tensor::Tensor(const Tensor &original) {
 }
 
 Tensor::Tensor(const IndexedTensor &original) {
+  // Copy all the data.
   rank = original.getRank();
   types = new IndexType[rank];
   components = new double[ipow(DIMENSION,rank)];
@@ -97,7 +107,8 @@ Tensor::Tensor(const IndexedTensor &original) {
 
 Tensor::~Tensor() {
   delete[] types;
-  delete[] components;
+  if(deleteComponents)
+    delete[] components;
 }
 
 Tensor Tensor::contract(int index1, int index2) const {

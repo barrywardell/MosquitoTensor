@@ -31,7 +31,7 @@ namespace Mosquito {
        * \param Rank The rank of the tensor.
        * \param ... The types of the indices.
        */
-      Tensor(int Rank, ...);
+      Tensor(int Rank = 0, ...);
 
       /**
        * \brief Constructor.
@@ -52,9 +52,12 @@ namespace Mosquito {
        * characters should be unique, so that a contraction is not
        * performed over the initialised tensor. See contract() for
        * information about indexes.
+       * If the data pointer is not given or is null then a new array of the
+       * appropriate size is created and initialized.
        * \param indexString The character array defining the tensor type.
+       * \param data Pointer to an array where the components are stored
        */
-      Tensor(const char* indexString);
+      Tensor(const char* indexString, double *data = 0);
 
       /**
        * Copy constructor.
@@ -83,8 +86,7 @@ namespace Mosquito {
        * \brief Names the indices, creating an IndexedTensor.
        *
        * Initial values are null.
-       * \param i1 The first index or NULL, to remove all indices.
-       * \param ... The va_list of other indexes.
+       * \param names The list of indices.
        * \retval this The indexed tensor, possibly with indexes contracted.
        */
       IndexedTensor operator[](char* names);
@@ -169,7 +171,17 @@ namespace Mosquito {
        * \param Types The types of the indices.
        */
       void init(int Rank, const IndexType* Types);
+
+      /**
+       * \brief Whether to delete components array in destructor
+       *
+       * The components array may be either allocated when the object is created
+       * or it may be passed as an argument to the constructor. When the
+       * destructor is called, this array should only be deleted in the former
+       * case. This flags whether the deletion should happen or not
+       */
+      bool deleteComponents;
   };
-}
+};
 
 #endif
