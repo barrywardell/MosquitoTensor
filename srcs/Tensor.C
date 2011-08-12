@@ -19,7 +19,6 @@ Tensor::Tensor(const char* indexString) {
 
   // Initialise.
   types = new IndexType[rank];
-  indexes = new char[rank];
   components = new double[ipow(DIMENSION, rank)];
   for (int i = 0; i < ipow(DIMENSION, rank); i++) components[i] = 0;
 
@@ -27,10 +26,8 @@ Tensor::Tensor(const char* indexString) {
   for (int i = 0; i < rank; i++) {
     if (indexString[2*i] == '^') {
       types[i] = UP;
-      indexes[i] = indexString[2*i + 1];
     } else if (indexString[2*i] == '_') {
       types[i] = DOWN;
-      indexes[i] = indexString[2*i + 1];
     } else {
       assert(false);
     }
@@ -61,43 +58,40 @@ void Tensor::init(int Rank, const IndexType* Types) {
   if (rank > 0) {
     types = new IndexType[rank];
     components = new double[ipow(DIMENSION,rank)];
-    indexes = new char[rank];
   } else {
     types = new IndexType[1]; // To avoid double free...
     components = new double[1];
-    indexes = new char[rank];
   }
   for (int i = 0; i < rank; i++) {
     types[i] = Types[i];
-    indexes[i] = 0;
   }
   for (int i = 0; i < ipow(DIMENSION,rank); i++) components[i] = 0.0;
 }
 
-Tensor::Tensor(int Rank, const IndexType* Types, const char* Indexes) {
-  init(Rank,Types);
-  for (int i = 0; i < rank; i++) {
-    indexes[i] = Indexes[i];
-  }
-}
-
 Tensor::Tensor(const Tensor &original) {
   rank = original.rank;
-  if (rank > 0) {
-    types = new IndexType[rank];
-    components = new double[ipow(DIMENSION,rank)];
-    indexes = new char[rank];
-  } else {
-    types = new IndexType[1]; // To avoid double free...
-    components = new double[1];
-    indexes = new char[1];
-  }
+  types = new IndexType[rank];
+  components = new double[ipow(DIMENSION,rank)];
   for (int i = 0; i < rank; i++) {
     types[i] = original.types[i];
-    indexes[i] = original.indexes[i];
   }
   for (int i = 0; i < ipow(DIMENSION,rank); i++) {
     components[i] = original.components[i];
+  }
+}
+
+Tensor::Tensor(const IndexedTensor &original) {
+  rank = original.getRank();
+  types = new IndexType[rank];
+  components = new double[ipow(DIMENSION,rank)];
+  const IndexType* originalTypes = original.getTypes();
+  for (int i = 0; i < rank; i++) {
+    types[i] = originalTypes[i];
+  }
+  int indices[rank];
+  for (int i = 0; i < ipow(DIMENSION,rank); i++) {
+    indexToIndices(i, indices);
+    components[i] = original.computeComponent(indices);
   }
 }
 
@@ -116,13 +110,9 @@ Tensor Tensor::contract(int index1, int index2) const {
   for (int i = 0; i < rank; i++) {
     if (i != index1 && i != index2) {
       resultTypes[runningIndex] = types[i];
-      resultIndexes[runningIndex++] = indexes[i];
     }
   }
   Tensor result(rank-2, resultTypes);
-  for (int i = 0; i < rank-2; i++) {
-    result.indexes[i] = resultIndexes[i];
-  }
 
   int indices[rank];
   int resultIndices[result.getRank()];
@@ -156,67 +146,15 @@ Tensor & Tensor::operator*=(const double scalar) {
   return *this;
 }
 
-Tensor & Tensor::operator+=(const Tensor &tensor) {
-  // Check indexing.
-  int permute[rank];
-  int indices[rank];
-  int permutedIndices[rank];
-  bool permutable = permutation(tensor.indexes, permute);
-  assert(permutable);
-
-  // Check to make sure permuted indexes are equal.
-  const Tensor::IndexType* tensorTypes = tensor.getTypes();
-  for (int i = 0; i < rank; i++) {
-    assert(types[i] == tensorTypes[permute[i]]);
-  }
-
-  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    for (int j = 0; j < rank; j++) permutedIndices[j] = indices[permute[j]];
-    components[i] += tensor(permutedIndices);
-  }
-  return *this;
-}
-
 Tensor Tensor::operator*(const double scalar) const {
   Tensor result = *this;
   result *= scalar;
   return result;
 }
 
-Tensor Tensor::operator+(const Tensor &tensor) const {
-  Tensor result = *this;
-  result += tensor;
-  return result;
-}
-
-IndexedTensor Tensor::it(char* names) {
+IndexedTensor Tensor::operator[](char* names) {
   IndexedTensor indexed(rank, types, components, names);
   return indexed;
-}
-
-Tensor Tensor::operator[](char* names) {
-  for (int i = 0; i < rank; i++) {
-    indexes[i] = names[i];
-    assert(names[i] != '\0'); // Ensure that there are enough indices.
-  }
-  Tensor copy = *this;
-  return copy;
-}
-
-Tensor Tensor::contract() const {
-  for (int i = 0; i < rank; i++) {
-    char index = indexes[i];
-    if (index != 0 && index != '.' && index != '-') {
-      for (int j = i+1; j < rank; j++) {
-        if (index == indexes[j]) {
-          return contract(i,j).contract();
-        }
-      }
-    }
-  }
-  Tensor copy = *this;
-  return copy;
 }
 
 Tensor Tensor::operator*(const Tensor& tensor) const {
@@ -226,11 +164,9 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
   const Tensor::IndexType* bTypes = tensor.getTypes();
   for (int i = 0; i < rank; i++) {
     resultTypes[i] = types[i];
-    resultIndexes[i] = indexes[i];
   }
   for (int i = 0; i < tensor.getRank(); i++) {
     resultTypes[rank+i] = bTypes[i];
-    resultIndexes[rank+i] = tensor.indexes[i];
   }
   Tensor result(rank+tensor.getRank(), resultTypes, resultIndexes);
 
@@ -245,41 +181,15 @@ Tensor Tensor::operator*(const Tensor& tensor) const {
       *tensor.components[tensor.index(tensorIndices)];
     result.components[i] = value;
   }
-  return result.contract();
+  return result;
 }
 
-bool Tensor::permutation(char* indexes2, int* permute) const {
+Tensor & Tensor::operator=(const Tensor &tensor) {
   for (int i = 0; i < rank; i++) {
-    bool indexFound = false;
-    assert(indexes[i]);
-    for (int j = 0; !indexFound && indexes2[j] != '\0' ; j++) {
-      if (indexes[i] == indexes2[j]) {
-        permute[i] = j;
-        indexFound = true;
-      }
-    }
-    if (!indexFound) return false;
+    assert(types[i] == tensor.types[i]);
   }
-  return true;
-}
-
-Tensor & Tensor::operator=(const Tensor & tensor) {
-  if (this == &tensor) return *this;
-  assert(rank == tensor.getRank());
-  int permute[rank];
-  bool permutable = permutation(tensor.indexes, permute);
-  assert(permutable);
-  const Tensor::IndexType* tensorTypes = tensor.getTypes();
-  for (int i = 0; i < rank; i++) {
-    assert(types[i] == tensorTypes[permute[i]]);
-  }
-
-  // Now assign components.
-  int indices[rank], permutedIndices[rank];
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    indexToIndices(i,indices);
-    for (int j = 0; j < rank; j++) permutedIndices[j] = indices[permute[j]];
-    components[i] = tensor(permutedIndices);
+    components[i] = tensor.components[i];
   }
   return *this;
 }

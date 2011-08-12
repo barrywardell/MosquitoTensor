@@ -58,16 +58,68 @@ namespace Mosquito {
        */
       ~IndexedTensor();
 
+      /**
+       * \brief Computes the indexed component.
+       * 
+       * When this indexed tensor has type TENSOR then the component is
+       * simply returned. This is where all of the computations are
+       * performed, via a recursive binary tree evaluation.
+       * \param indices The indices of the component to compute.
+       * \retval component The computed component.
+       */
+      double computeComponent(const int *indices) const;
+
+      /**
+       * \brief Scalar multiplication.
+       * \param scalar The scalar to multiply by.
+       * \retval The product (*this)*scalar.
+       */
+      IndexedTensor operator*(const double scalar) const;
+
+      /**
+       * \brief Scalar multiplication.
+       * \param scalar The scalar to multiply by.
+       * \param tensor The tensor to multiply.
+       * \retval result The product scalar*tensor.
+       */
+      friend IndexedTensor operator*(const double scalar, 
+          const IndexedTensor &tensor) {return tensor*scalar;};
+
+      /**
+       * \brief Addition of tensors.
+       * \param tensor The tensor to add to this one.
+       * \retval result The sum of the two tensors.
+       */
+      IndexedTensor operator+(const IndexedTensor &tensor) const;
+
+      /**
+       * \brief Tensor subtraction.
+       * \param tensor The tensor to subtract from this one.
+       * \retval result The resut (*this)-tensor.
+       */
+      IndexedTensor operator-(const IndexedTensor &tensor) const 
+      { return operator+(tensor*(-1));};
+
+      /**
+       * \brief Tensor multiplication.
+       *
+       * May also perform contractions across tensors.
+       * \param tensor The tensor to multiply by this.
+       * \retval The product (*this)*tensor.
+       */
+      IndexedTensor operator*(const IndexedTensor &tensor) const;
+
     private:
       /**
        * \brief Defines whether this is an actual tensor or a node in
        * the operation tree.
        */
       enum TensorType {
-        MULTIPLICATION = 0,   /**< This is a multiplication node. */
-        CONTRACTION = 1,      /**< This is a contraction node. */
-        ADDITION = 2,         /**< This is an addition node. */
-        TENSOR = 3            /**< This is a leaf: actual data. */
+        MULTIPLICATION = 0,       /**< This is a multiplication node. */
+        CONTRACTION = 1,          /**< This is a contraction node. */
+        ADDITION = 2,             /**< This is an addition node. */
+        TENSOR = 3,               /**< This is a leaf: actual data. */
+        SCALARMULTIPLICATION = 4  /**< Scalar multiplication. */
       };
 
       /**
@@ -83,12 +135,12 @@ namespace Mosquito {
       /**
        * \brief The left tensor in the operation tree.
        */
-      IndexedTensor *left;
+      const IndexedTensor *left;
 
       /**
        * \brief The right tensor in the operation tree.
        */
-      IndexedTensor *right;
+      const IndexedTensor *right;
 
       /**
        * \brief Special storage for contraction type nodes, so as not to throw
@@ -101,6 +153,11 @@ namespace Mosquito {
        * this information away.
        */
       int rightContractionIndex;
+
+      /**
+       * \brief A scalar to multiply by.
+       */
+      double multiplicand;
 
       /**
        * \brief Returns the permutation vector which defines how to
@@ -119,17 +176,6 @@ namespace Mosquito {
       bool permutation(const char* labels2, int* permute) const;
 
       /**
-       * \brief Computes the indexed component.
-       * 
-       * When this indexed tensor has type TENSOR then the component is
-       * simply returned. This is where all of the computations are
-       * performed, via a recursive binary tree evaluation.
-       * \param indices The indices of the component to compute.
-       * \retval component The computed component.
-       */
-      double computeComponent(const int *indices) const;
-
-      /**
        * \brief Builds the branch of contractions.
        *
        * Assumes that this tensor has complete type information (labels,
@@ -146,14 +192,6 @@ namespace Mosquito {
        * Used internally so that branches can be constructed.
        */
       IndexedTensor() {};
-
-      /**
-       * \brief Constructs a node in a contraction branch.
-       * \param Rank The rank of the tensor.
-       * \param Types The IndexType's of the indices.
-       * \param Left A pointer down the branch...
-       */
-      IndexedTensor(int Rank, IndexType* Types, IndexedTensor *Left);
   };
 };
 

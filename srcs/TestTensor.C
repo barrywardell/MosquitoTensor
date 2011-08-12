@@ -52,9 +52,8 @@ void TestTensor::runContractionTest() {
     v(i) = 1;
   }
   Tensor uv2 = u*v;
-//  Tensor scalar3 = uv2.contract(0,1);
   Tensor scalar3("");
-  scalar3.it("") = uv2.it("aa");
+  scalar3[""] = uv2["aa"];
   assert(scalar3(0) == 4.);
 
   Tensor scalar4 = u["a"]*v["a"];
@@ -69,8 +68,8 @@ void TestTensor::runContractionTest() {
   test0(2,2) = 3;
   test0(3,3) = 4;
   test0(3,4) = -100000;
-  Tensor scalar5 = test0["aa"];
-  assert(scalar5(0) == 0.);
+  scalar4[""] = test0["aa"];
+  assert(scalar4(0) == 0.);
 }
 
 void TestTensor::runTensorMultiplyTest() {
@@ -88,6 +87,20 @@ void TestTensor::runTensorMultiplyTest() {
       assert(abs((i+1.)*(j+1.) - uSquared(i,j)) < 1.0e-16);
     }
   }
+
+  Tensor v("_a");
+  for (int i = 0; i < DIMENSION; i++) {
+    u(i) = 1;
+    v(i) = 1;
+  }
+  Tensor uv = u["a"]*v["b"];
+  for (int i = 0; i < DIMENSION; i++) {
+    for (int j = 0; j < DIMENSION; j++) {
+      assert(uv(i,j) == 1);
+    }
+  }
+  Tensor scalar = uv["aa"];
+  assert(scalar(0) == 4);
 }
 
 double TestTensor::abs(double x) {
@@ -122,6 +135,11 @@ void TestTensor::runScalarMultiplyTest() {
 
   Tensor tempF = 2.*tempA;
   Tensor tempAA = tempF/2.;
+  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
+    assert(tempAA.components[i] == tempA.components[i]);
+  }
+
+  tempAA["abc"] = 0.5*tempF["abc"];
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     assert(tempAA.components[i] == tempA.components[i]);
   }
@@ -160,19 +178,10 @@ void TestTensor::runIndexingTest() {
   Tensor::IndexType up = Tensor::UP;
   Tensor::IndexType down = Tensor::DOWN;
   Tensor gamma(3,up,down,down);
-  gamma["abc"];
-  gamma.permutation(gamma.indexes, permute);
-  for (int i = 0; i < 3; i++) {
-    assert(i == permute[i]);
-  }
 
   Tensor christoffel("^a_b_c");
   Tensor somethingElse("_b^a_c");
-  christoffel = somethingElse;
-}
-
-void debug(int i) {
-  std::cout << "Got here " << i << "\n";
+  christoffel["abc"] = somethingElse["bac"];
 }
 
 void TestTensor::runLinearCombinationTest() {
@@ -182,24 +191,25 @@ void TestTensor::runLinearCombinationTest() {
     componentsA[i] = i;
   }
 
-  Tensor tempB =  3.0*tempA["abc"] - 2.0*tempA["abc"];
-  double* componentsB = tempB.getComponents();
+  Tensor temp("^a_b_c");
+
+  temp["abc"] =  3.0*tempA["abc"] - 2.0*tempA["abc"];
+  double* componentsB = temp.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double a = componentsA[i];
     double c = componentsB[i];
     assert(a == c);
   }
 
-  Tensor tempD = tempA["abc"];
-  tempD += (-1)*tempA["abc"];
-  double* componentsD = tempD.getComponents();
+  temp["abc"] = tempA["abc"] - tempA["abc"];
+  double* componentsD = temp.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsD[i];
     assert(c == 0);
   }
 
-  Tensor tempE = tempA["abc"] + (-1)*tempA["abc"];
-  double* componentsE = tempE.getComponents();
+  temp["abc"] = tempA["abc"] + (-1)*tempA["abc"];
+  double* componentsE = temp.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsE[i];
     assert(c==0);
@@ -209,14 +219,6 @@ void TestTensor::runLinearCombinationTest() {
   double* componentsF = tempF.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     double c = componentsF[i];
-    assert(c==0);
-  }
-
-  Tensor tempG = tempA["abc"];
-  tempG -= tempA["abc"];
-  double* componentsG = tempG.getComponents();
-  for (int i = 0; i < ipow(DIMENSION, rank); i++) {
-    double c = componentsG[i];
     assert(c==0);
   }
 
@@ -249,9 +251,8 @@ void TestTensor::runLinearCombinationTest() {
       tempK(i,j) = -tempK(j,i);
     }
   }
-  Tensor tempL("_b_a");
-  tempL = tempK["ab"];
-  Tensor tempM = tempL["ab"] + tempK["ab"];
+  Tensor tempL = tempK["ba"];
+  Tensor tempM = tempL["ba"] + tempK["ab"];
   for (int i = 0; i < DIMENSION; i++) {
     for (int j = 0; j < DIMENSION; j++) {
       assert(tempM(i,j) == 0);

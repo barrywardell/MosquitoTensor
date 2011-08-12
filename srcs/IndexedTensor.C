@@ -10,6 +10,9 @@ IndexedTensor::~IndexedTensor() {
     delete left;
     delete[] types;
     delete[] labels;
+  } else if (indexedType == MULTIPLICATION) {
+    delete[] types;
+    delete[] labels;
   }
 }
 
@@ -132,6 +135,8 @@ double IndexedTensor::computeComponent(const int* indices) const {
       value += left->computeComponent(indicesLeft);
     }
     return value;
+  } else if (indexedType == SCALARMULTIPLICATION) {
+    return multiplicand*left->computeComponent(indices);
   }
   return 0;
 }
@@ -139,7 +144,7 @@ double IndexedTensor::computeComponent(const int* indices) const {
 bool IndexedTensor::permutation(const char* labels2, int* permute) const {
   for (int i = 0; i < rank; i++) {
     bool indexFound = false;
-    assert(labels[i]);
+    assert(labels[i]); // No NULL labels!
     for (int j = 0; !indexFound && labels2[j] != '\0' ; j++) {
       if (labels[i] == labels2[j]) {
         permute[i] = j;
@@ -183,4 +188,106 @@ IndexedTensor * IndexedTensor::contract(int index1, int index2,
     return node->contract(index1, index2, contractionsNeeded - 1);
   }
   return this;
+}
+
+IndexedTensor IndexedTensor::operator*(const double scalar) const {
+  IndexedTensor result;
+  result.indexedType = SCALARMULTIPLICATION;
+  result.types = types;
+  result.labels = labels;
+  result.left = this;
+  result.rank = rank;
+  result.multiplicand = scalar;
+  return result;
+}
+
+IndexedTensor IndexedTensor::operator+(const IndexedTensor &tensor) const {
+  // Ensure consistency of addition.
+  assert(rank == tensor.getRank());
+  int permute[rank];
+  bool permutable = permutation(tensor.labels, permute);
+  assert(permutable);
+  for (int i = 0; i < rank; i++) {
+    assert(types[i] == tensor.types[permute[i]]);
+  }
+
+  // Set up addition node.
+  IndexedTensor result;
+  result.indexedType = ADDITION;
+  result.types = types;
+  result.labels = labels;
+  result.left = this;
+  result.right = &tensor;
+  result.rank = rank;
+  return result;
+}
+
+IndexedTensor IndexedTensor::operator*(const IndexedTensor &tensor) const {
+  // Build product data.
+  int prodRank = rank + tensor.getRank();
+  char *prodLabels = new char[prodRank];
+  IndexType *prodTypes = new IndexType[prodRank];
+  for (int i = 0; i < rank; i++) {
+    prodLabels[i] = labels[i];
+    prodTypes[i] = types[i];
+  }
+  for (int i = 0; i < tensor.getRank(); i++) {
+    prodLabels[rank + i] = tensor.labels[i];
+    prodTypes[rank + i] = tensor.types[i];
+  }
+
+  // Determine if contractions are needed.
+  int index1 = -1, contractionsNeeded = 0, index2;
+  for (int i = 0; i < prodRank; i++) {
+    int found = 0;
+    for (int j = i + 1; j < prodRank; j++) {
+      if (prodLabels[i] == prodLabels[j]) {
+        found++;
+        assert(prodTypes[i] != prodTypes[j]);
+        if (index1 == -1) {
+          index1 = i;
+          index2 = j;
+        }
+        contractionsNeeded++;
+      }
+    }
+    assert(found == 0 || found == 1);
+  }
+
+  // Build product.
+  IndexedTensor *product = new IndexedTensor();
+  product->rank = prodRank;
+  product->indexedType = MULTIPLICATION;
+  product->left = this;
+  product->right = &tensor;
+  product->types = prodTypes;
+  product->labels = prodLabels;
+
+  // Determine what type to return:
+  if (contractionsNeeded == 0) {
+    return *product;
+  } else {
+    IndexedTensor *result = new IndexedTensor();
+    result->indexedType = CONTRACTION;
+    result->rank = prodRank - 2*contractionsNeeded;
+    result->left = product->contract(index1, index2, contractionsNeeded);
+    result->labels = new char[result->rank];
+    result->types = new IndexType[result->rank];
+    result->leftContractionIndex = -1;
+    int runningIndex = 0;
+    for (int i = 0; i < result->rank + 2; i++) {
+      for (int j = i + 1; j < result->rank + 2; j++) {
+        if (result->left->labels[i] == result->left->labels[j]) {
+          result->leftContractionIndex = i;
+          result->rightContractionIndex = j;
+        }
+      }
+      if (i != result->leftContractionIndex &&
+          i != result->rightContractionIndex) {
+        result->labels[runningIndex] = result->left->labels[i];
+        result->types[runningIndex++] = result->left->types[i];
+      }
+    }
+    return *result;
+  }
 }
