@@ -8,6 +8,10 @@
 
 #define DIMENSION 4
 
+void debug(int i) {
+  std::cout << "got here " << i << "\n";
+}
+
 using namespace Mosquito;
 
 int ipow(int i, int j);
@@ -110,7 +114,6 @@ double TestTensor::abs(double x) {
 
 void TestTensor::runScalarMultiplyTest() {
   Tensor tempA(rank, types);
-  int indices[3];
   double * components = tempA.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     components[i] = i;
@@ -174,13 +177,13 @@ void TestTensor::runIndexingTest() {
     assert(i == index(indices));
   }
 
-  int permute[rank];
   Tensor::IndexType up = Tensor::UP;
   Tensor::IndexType down = Tensor::DOWN;
   Tensor gamma(3,up,down,down);
 
   Tensor christoffel("^a_b_c");
   Tensor somethingElse("_b^a_c");
+  somethingElse["bac"];
   christoffel["abc"] = somethingElse["bac"];
 }
 
@@ -190,7 +193,7 @@ void TestTensor::runLinearCombinationTest() {
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     componentsA[i] = i;
   }
-
+  
   Tensor temp("^a_b_c");
 
   temp["abc"] =  3.0*tempA["abc"] - 2.0*tempA["abc"];

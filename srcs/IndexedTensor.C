@@ -6,18 +6,41 @@
 using namespace Mosquito;
 
 IndexedTensor::~IndexedTensor() {
+  delete[] labels;
   if (indexedType == CONTRACTION) {
     delete left;
     delete[] types;
-    delete[] labels;
   } else if (indexedType == MULTIPLICATION) {
     delete[] types;
-    delete[] labels;
   }
 }
 
+IndexedTensor::IndexedTensor(const IndexedTensor &tensor) {
+  rank = tensor.rank;
+  indexedType = tensor.indexedType;
+  labels = copyLabels(tensor.labels);
+  if (indexedType == CONTRACTION || indexedType == MULTIPLICATION) {
+    types = new IndexType[rank];
+    for (int i = 0; i < rank; i++) {
+      types[i] = tensor.types[i];
+    }
+  } else {
+    types = tensor.types;
+  }
+  if (indexedType == CONTRACTION) {
+    left = new IndexedTensor(*tensor.left);
+  } else {
+    left = tensor.left;
+  }
+  right = tensor.right;
+  multiplicand = tensor.multiplicand;
+  leftContractionIndex = tensor.leftContractionIndex;
+  rightContractionIndex = tensor.rightContractionIndex;
+  components = tensor.components;
+}
+
 IndexedTensor::IndexedTensor(int Rank, IndexType* Types, 
-    double* Components, char* Labels) {
+    double* Components, const char* Labels) {
   // Determine if we need to contract.
   int contractionsNeeded = 0;
   int index2, index1 = -1;
@@ -43,8 +66,8 @@ IndexedTensor::IndexedTensor(int Rank, IndexType* Types,
     IndexedTensor *leaf = new IndexedTensor();
     leaf->components = Components;
     leaf->types = Types;
-    leaf->labels = Labels;
     leaf->rank = Rank;
+    leaf->labels = leaf->copyLabels(Labels);
     leaf->indexedType = TENSOR;
     left = leaf->contract(index1, index2, contractionsNeeded);
 
@@ -70,8 +93,8 @@ IndexedTensor::IndexedTensor(int Rank, IndexType* Types,
       }
     }
   } else {
-    labels = Labels;
     rank = Rank;
+    labels = copyLabels(Labels);
     types = Types;
     components = Components;
     indexedType = TENSOR;
@@ -86,6 +109,7 @@ IndexedTensor &IndexedTensor::operator=(const IndexedTensor &tensor) {
   }
   int permute[rank];
   bool permutable = permutation(tensor.labels, permute);
+  assert(permutable);
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
     int indices[rank];
     indexToIndices(i, indices);
@@ -93,6 +117,7 @@ IndexedTensor &IndexedTensor::operator=(const IndexedTensor &tensor) {
     for (int j = 0; j < rank; j++) {
       permutedIndices[j] = indices[permute[j]];
     }
+
     components[i] = tensor.computeComponent(permutedIndices);
   }
   return *this;
@@ -105,13 +130,14 @@ double IndexedTensor::computeComponent(const int* indices) const {
     // Indexing is left prioritizing... so this's labels is left's labels
     // TODO: Make a function to get permuted indices directly?
     int permute[rank];
-    permutation(right->labels, permute);
+    bool permutable = permutation(right->labels, permute);
+    assert(permutable);
     int permutedIndices[rank];
     for (int i = 0; i < rank; i++) {
       permutedIndices[i] = indices[permute[i]];
     }
     return  left ->computeComponent(indices) +
-            right->computeComponent(permutedIndices);
+            multiplicand*right->computeComponent(permutedIndices);
 
   } else if (indexedType == MULTIPLICATION) {
     return left->computeComponent(indices)* // Only uses the first few
@@ -194,14 +220,23 @@ IndexedTensor IndexedTensor::operator*(const double scalar) const {
   IndexedTensor result;
   result.indexedType = SCALARMULTIPLICATION;
   result.types = types;
-  result.labels = labels;
-  result.left = this;
   result.rank = rank;
+  result.labels = result.copyLabels(labels);
+  result.left = this;
   result.multiplicand = scalar;
   return result;
 }
 
 IndexedTensor IndexedTensor::operator+(const IndexedTensor &tensor) const {
+  return arithmetic(tensor, 1);
+}
+
+IndexedTensor IndexedTensor::operator-(const IndexedTensor &tensor) const {
+  return arithmetic(tensor, -1);
+}
+
+IndexedTensor IndexedTensor::arithmetic(const IndexedTensor &tensor,
+    int sign) const {
   // Ensure consistency of addition.
   assert(rank == tensor.getRank());
   int permute[rank];
@@ -215,10 +250,11 @@ IndexedTensor IndexedTensor::operator+(const IndexedTensor &tensor) const {
   IndexedTensor result;
   result.indexedType = ADDITION;
   result.types = types;
-  result.labels = labels;
+  result.rank = rank;
+  result.labels = result.copyLabels(labels);
   result.left = this;
   result.right = &tensor;
-  result.rank = rank;
+  result.multiplicand = sign;
   return result;
 }
 
@@ -261,7 +297,7 @@ IndexedTensor IndexedTensor::operator*(const IndexedTensor &tensor) const {
   product->left = this;
   product->right = &tensor;
   product->types = prodTypes;
-  product->labels = prodLabels;
+  product->labels = product->copyLabels(prodLabels);
 
   // Determine what type to return:
   if (contractionsNeeded == 0) {
@@ -290,4 +326,13 @@ IndexedTensor IndexedTensor::operator*(const IndexedTensor &tensor) const {
     }
     return *result;
   }
+}
+
+char* IndexedTensor::copyLabels(const char* Labels) const {
+  assert(rank >= 0);
+  char *copy = new char[rank];
+  for (int i = 0; i < rank; i++) {
+    copy[i] = Labels[i];
+  }
+  return copy;
 }

@@ -1,8 +1,9 @@
 // Copyright Aaryn Tonita, 2011
 // Distributed under the Gnu general public license
+#include "Tensor.h"
 #include <cstdlib>
 #include <cassert>
-#include "Tensor.h"
+#include <iostream>
 #define DIMENSION 4
 
 using namespace Mosquito;
@@ -116,7 +117,6 @@ Tensor Tensor::contract(int index1, int index2) const {
   assert(types[index1] != types[index2]);
   // Won't use the last two, but need to allocate more than 0...
   Tensor::IndexType resultTypes[rank];
-  char resultIndexes[rank];
   int runningIndex = 0;
   for (int i = 0; i < rank; i++) {
     if (i != index1 && i != index2) {
@@ -163,7 +163,7 @@ Tensor Tensor::operator*(const double scalar) const {
   return result;
 }
 
-IndexedTensor Tensor::operator[](char* names) {
+IndexedTensor Tensor::operator[](const char* names) {
   IndexedTensor indexed(rank, types, components, names);
   return indexed;
 }

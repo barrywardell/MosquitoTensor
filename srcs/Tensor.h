@@ -89,7 +89,7 @@ namespace Mosquito {
        * \param names The list of indices.
        * \retval this The indexed tensor, possibly with indexes contracted.
        */
-      IndexedTensor operator[](char* names);
+      IndexedTensor operator[](const char* names);
 
       /**
        * \brief Destructor.

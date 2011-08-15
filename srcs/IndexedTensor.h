@@ -40,7 +40,12 @@ namespace Mosquito {
        * \param Labels The labels for the indices.
        */
       IndexedTensor(int Rank, IndexType* Types, double* Components,
-          char* Labels);
+          const char* Labels);
+
+      /**
+       * \brief Copy constructor.
+       */
+      IndexedTensor(const IndexedTensor &tensor);
 
       /**
        * \brief Assignment.
@@ -97,8 +102,7 @@ namespace Mosquito {
        * \param tensor The tensor to subtract from this one.
        * \retval result The resut (*this)-tensor.
        */
-      IndexedTensor operator-(const IndexedTensor &tensor) const 
-      { return operator+(tensor*(-1));};
+      IndexedTensor operator-(const IndexedTensor &tensor) const;
 
       /**
        * \brief Tensor multiplication.
@@ -191,7 +195,24 @@ namespace Mosquito {
        *
        * Used internally so that branches can be constructed.
        */
-      IndexedTensor() {};
+      IndexedTensor() {rank = -1;};
+
+      /**
+       * \brief Copies the labels.
+       * Ensure that the rank of this object is set before calling this!
+       *
+       * \param Labels The constant string to copy.
+       * \retval copy A non-constant array copy.
+       */
+      char* copyLabels(const char* Labels) const;
+
+      /**
+       * \brief Tensor arithmetic.
+       * \param tensor The tensor to add/subtract from this one.
+       * \param sign The sign of the operand.
+       * \retval result The resut (*this)+sign*tensor.
+       */
+      IndexedTensor arithmetic(const IndexedTensor &tensor, int sign) const;
   };
 };
 
