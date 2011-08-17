@@ -17,79 +17,81 @@
 #include <string>
 #include "Tensor.h"
 
-class TensorList {
-  public:
-    /**
-     * Constructor.
-     *
-     * Creates an empty TensorList object.
-     */
-    TensorList();
-    
-    /**
-     * \brief Get a named tensor
-     *
-     * Retrieve the named tensor from the list.
-     *
-     * \param name The name of the tensor.
-     * \retval this The named tensor object.
-     */
-    Tensor& operator[](const char* name);
+namespace Mosquito {
+  class TensorList {
+    public:
+      /**
+       * Constructor.
+       *
+       * Creates an empty TensorList object.
+       */
+      TensorList();
 
-    /**
-     * \brief Append a tensor to the list
-     *
-     * \param name The name of the tensor.
-     * \param indexString The character array defining the tensor type.
-     */
-    void append(const char* name, const char* indexString);
+      /**
+       * \brief Get a named tensor
+       *
+       * Retrieve the named tensor from the list.
+       *
+       * \param name The name of the tensor.
+       * \retval this The named tensor object.
+       */
+      Tensor& operator[](const char* name);
 
-    /**
-     * \brief Append a scalar Tensor object to the list
-     *
-     * \param name The name of the scalar.
-     */
-    void append(const char* name);
+      /**
+       * \brief Append a tensor to the list
+       *
+       * \param name The name of the tensor.
+       * \param indexString The character array defining the tensor type.
+       */
+      void append(const char* name, const char* indexString);
 
-    /**
-     * \brief Copy components of all tensors to an array of doubles
-     *
-     * This routine is provided so one can quickly output all the data to
-     * a C array of doubles. It is assumed that the array has been allocated
-     * and is at least as large as the total number of tensor components.
-     * \param array A pointer to a double array for the data
-     * \retval num The number of components copied
-     */
-    int getComponents(double* array);
+      /**
+       * \brief Append a scalar Tensor object to the list
+       *
+       * \param name The name of the scalar.
+       */
+      void append(const char* name);
 
-    /**
-     * \brief Copy components of all tensors from an array of doubles
-     *
-     * This routine is provided so one can quickly set all the data from
-     * a C array of doubles. It is assumed that the array has been allocated
-     * and is at least as large as the number of tensor components.
-     * \param array A pointer to a double array containing the data
-     * \retval num The number of components copied
-     */
-    int setComponents(const double* array);
+      /**
+       * \brief Copy components of all tensors to an array of doubles
+       *
+       * This routine is provided so one can quickly output all the data to
+       * a C array of doubles. It is assumed that the array has been allocated
+       * and is at least as large as the total number of tensor components.
+       * \param array A pointer to a double array for the data
+       * \retval num The number of components copied
+       */
+      int getComponents(double* array);
 
-    /**
-     * \brief Return the total number of components in all tensors
-     *
-     * \retval num The total number of components
-     */
-    int getNumComponents() const;
+      /**
+       * \brief Copy components of all tensors from an array of doubles
+       *
+       * This routine is provided so one can quickly set all the data from
+       * a C array of doubles. It is assumed that the array has been allocated
+       * and is at least as large as the number of tensor components.
+       * \param array A pointer to a double array containing the data
+       * \retval num The number of components copied
+       */
+      int setComponents(const double* array);
 
-  private:
-    /**
-     * The Tensor objects in the TensorList
-     */
-    std::map<std::string, Tensor> tensors;
+      /**
+       * \brief Return the total number of components in all tensors
+       *
+       * \retval num The total number of components
+       */
+      int getNumComponents() const;
 
-    /**
-     * Total number of components of all tensors
-     */
-    int numComponents;
+    private:
+      /**
+       * The Tensor objects in the TensorList
+       */
+      std::map<std::string, Tensor> tensors;
+
+      /**
+       * Total number of components of all tensors
+       */
+      int numComponents;
+  };
 };
 
 #endif

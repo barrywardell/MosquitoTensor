@@ -15,6 +15,7 @@
 #include <cassert>
 
 using namespace std;
+using namespace Mosquito;
 
 TensorList::TensorList()
  : numComponents(0)
