@@ -39,8 +39,22 @@ IndexedTensor::IndexedTensor(const IndexedTensor &tensor) {
   components = tensor.components;
 }
 
+IndexedTensor::IndexedTensor() {
+  nullify();
+}
+
+void IndexedTensor::nullify() {
+  rank = -1;
+  rightContractionIndex = -1;
+  leftContractionIndex = -1;
+  left = NULL;
+  right = NULL;
+  components = NULL;
+}
+
 IndexedTensor::IndexedTensor(int Rank, IndexType* Types, 
     double* Components, const char* Labels) {
+  nullify();
   // Determine if we need to contract.
   int contractionsNeeded = 0;
   int index2, index1 = -1;
@@ -297,7 +311,7 @@ IndexedTensor IndexedTensor::operator*(const IndexedTensor &tensor) const {
   product->left = this;
   product->right = &tensor;
   product->types = prodTypes;
-  product->labels = product->copyLabels(prodLabels);
+  product->labels = prodLabels;
 
   // Determine what type to return:
   if (contractionsNeeded == 0) {

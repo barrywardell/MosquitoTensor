@@ -195,7 +195,12 @@ namespace Mosquito {
        *
        * Used internally so that branches can be constructed.
        */
-      IndexedTensor() {rank = -1;};
+      IndexedTensor();
+
+      /**
+       * \brief Sets the various data to NULL.
+       */
+      void nullify();
 
       /**
        * \brief Copies the labels.
