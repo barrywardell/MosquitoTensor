@@ -74,6 +74,15 @@ void TestTensor::runContractionTest() {
   test0(3,4) = -100000;
   scalar4[""] = test0["aa"];
   assert(scalar4(0) == 0.);
+
+  Tensor etaUp("^a^b");
+  Tensor etaDown("_a_b");
+  etaUp(0,0) = etaDown(0,0) = -1;
+  for (int i = 1; i < 4; i++) {
+    etaUp(i,i) = etaDown(i,i) = 1.;
+  }
+  Tensor scalar = etaUp["ab"]*etaDown["ab"];
+  assert(scalar(0) == 4);
 }
 
 void TestTensor::runTensorMultiplyTest() {

@@ -198,24 +198,28 @@ bool IndexedTensor::permutation(const char* labels2, int* permute) const {
 
 IndexedTensor * IndexedTensor::contract(int index1, int index2,
     int contractionsNeeded) {
-  // By assumption this IndexedTensor is completely setup.
-  IndexedTensor *node = new IndexedTensor();
-  node->indexedType = CONTRACTION;
-  node->left = this;
-  node->types = new IndexType[rank-2];
-  node->labels = new char[rank-2];
-
-  // Build node's labels and types.
-  int runningIndex = 0;
-  for (int i = 0; i < rank; i++) {
-    if (i != index1 && i != index2) {
-      node->types[runningIndex] = types[i];
-      node->labels[runningIndex++] = labels[i];
-    }
-  }
-
-  // Determine indexes if another contraction is needed.
   if (contractionsNeeded > 1) {
+    // By assumption this IndexedTensor is completely setup and is 
+    // a multiplication or a tensor or a contraction.
+    IndexedTensor *node = new IndexedTensor();
+    node->rank = rank - 2;
+    node->indexedType = CONTRACTION;
+    node->left = this;
+    node->types = new IndexType[rank-2];
+    node->labels = new char[rank-2];
+    node->leftContractionIndex = index1;
+    node->rightContractionIndex = index2;
+
+    // Build node's labels and types.
+    int runningIndex = 0;
+    for (int i = 0; i < rank; i++) {
+      if (i != index1 && i != index2) {
+        node->types[runningIndex] = types[i];
+        node->labels[runningIndex++] = labels[i];
+      }
+    }
+
+    // Determine indexes if another contraction is needed.
     for (int i = 0; i < rank-2; i++) {
       for (int j = i+1; j < rank-2; j++) {
         if (node->labels[i] == node->labels[j]) {
