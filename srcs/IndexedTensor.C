@@ -1,4 +1,5 @@
 #include "IndexedTensor.h"
+#include <cstdlib>
 #include <cassert>
 
 #define DIMENSION 4
@@ -129,7 +130,7 @@ IndexedTensor &IndexedTensor::operator=(const IndexedTensor &tensor) {
     indexToIndices(i, indices);
     int permutedIndices[rank];
     for (int j = 0; j < rank; j++) {
-      permutedIndices[j] = indices[permute[j]];
+      permutedIndices[permute[j]] = indices[j];
     }
 
     components[i] = tensor.computeComponent(permutedIndices);
@@ -148,7 +149,7 @@ double IndexedTensor::computeComponent(const int* indices) const {
     assert(permutable);
     int permutedIndices[rank];
     for (int i = 0; i < rank; i++) {
-      permutedIndices[i] = indices[permute[i]];
+      permutedIndices[permute[i]] = indices[i];
     }
     return  left ->computeComponent(indices) +
             multiplicand*right->computeComponent(permutedIndices);

@@ -2,6 +2,8 @@
 // Distributed under the Gnu general public license
 #include <iostream>
 #include <cassert>
+#include <ctime>
+#include <cstdlib>
 #define private public
 #define protected public
 #include "Tensor.h"
@@ -197,6 +199,25 @@ void TestTensor::runIndexingTest() {
 }
 
 void TestTensor::runLinearCombinationTest() {
+  // build a random tensor
+  Tensor tempN("_a_b_c");
+  srand(time(NULL));
+  for (int i = 0; i < ipow(DIMENSION,3); i++)
+    tempN.components[i] = (double)rand()/(double)RAND_MAX;
+
+  // Make symmetric in last two indices, addition only.
+  Tensor tempO = tempN["abc"] + tempN["acb"] + tempN["bac"] + tempN["cab"];
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      for (int k = j+1; k < 4; k++) {
+      assert( abs(tempO(i,j,k) - tempO(i,k,j)) < 1.0e-15);
+      }
+    }
+  }
+
+  // Make symmetric, with subtraction.
+  Tensor tempP = tempN["abc"] + tempN["acb"] + tempN["bac"] + tempN["bca"];
+ //- (tempN["bca"] + tempN["cba"]);
   Tensor tempA(rank, types);
   double* componentsA = tempA.getComponents();
   for (int i = 0; i < ipow(DIMENSION, rank); i++) {
@@ -270,6 +291,7 @@ void TestTensor::runLinearCombinationTest() {
       assert(tempM(i,j) == 0);
     }
   }
+
 }
 
 int main() {
