@@ -57,6 +57,13 @@ namespace Mosquito {
       int getComponents(double* array);
 
       /**
+       * \brief The number of components in the tensor
+       *
+       * \retval num The number of components
+       */
+      int getNumComponents() const;
+
+      /**
        * \brief Copy all components from an array of doubles
        *
        * This routine is provided so one can quickly set all the data from

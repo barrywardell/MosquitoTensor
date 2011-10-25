@@ -80,6 +80,11 @@ double * TensorBase::getComponents() const {
   return components;
 }
 
+int TensorBase::getNumComponents() const
+{
+  return ipow(DIMENSION, rank);
+}
+
 int TensorBase::ipow(int i, int j) const {
   int retValue = 1;
   for (int k = 0; k < j; k++) {
