@@ -58,7 +58,7 @@ IndexedTensor::IndexedTensor(int Rank, IndexType* Types,
   nullify();
   // Determine if we need to contract.
   int contractionsNeeded = 0;
-  int index2, index1 = -1;
+  int index2 = -1, index1 = -1;
   for (int i = 0; i < Rank; i++) {
     int found = 0; // Check that index appears once or twice only.
     for (int j = i+1; j < Rank; j++) {
@@ -292,7 +292,7 @@ IndexedTensor IndexedTensor::operator*(const IndexedTensor &tensor) const {
   }
 
   // Determine if contractions are needed.
-  int index1 = -1, contractionsNeeded = 0, index2;
+  int index1 = -1, contractionsNeeded = 0, index2 = -1;
   for (int i = 0; i < prodRank; i++) {
     int found = 0;
     for (int j = i + 1; j < prodRank; j++) {
