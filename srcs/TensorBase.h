@@ -75,6 +75,14 @@ namespace Mosquito {
       int setComponents(const double* array);
 
       /**
+       * \brief Returns a reference to the scalar value.
+       *
+       * The object must be a scalar or this will fail.
+       * \retval value The scalar value.
+       */
+      double & operator()() const;
+
+      /**
        * \brief Returns a reference to the indexed component.
        * \param i1 The first index.
        * \param ... The next indices.
