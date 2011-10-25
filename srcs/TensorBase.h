@@ -54,7 +54,7 @@ namespace Mosquito {
        * \param array A pointer to a double array for the data
        * \retval num The number of components copied
        */
-      int getComponents(double* array);
+      int getComponents(double* array) const;
 
       /**
        * \brief The number of components in the tensor
